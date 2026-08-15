@@ -1,6 +1,7 @@
 // ignore: file_names
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:music_player/core/services/storage.dart';
 
 class Pagewelcomcontroller extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -49,6 +50,10 @@ class Pagewelcomcontroller extends GetxController
         ..forward();
     });
     super.onInit();
+  }
+
+  Future<void> saveName() async {
+    await Storage().writeName(name.text);
   }
 
   @override

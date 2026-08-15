@@ -5,6 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/utils.dart';
+import 'package:music_player/core/constants/appSize.dart';
+import 'package:music_player/core/constants/colors.dart';
+import 'package:music_player/core/theme/app_theme_extension.dart';
 import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
 import 'package:music_player/features/pageWelcom/widgets/bottomNavigationBar.dart';
 import 'package:music_player/features/pageWelcom/widgets/indexPageWelcom.dart';
@@ -21,15 +24,12 @@ class PageWelcom extends StatelessWidget {
     return Container(
       //Background color
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF35003B),
-            Color(0xFF1D0021),
-            Color(0xFF0D000F),
-            Color(0xFF000000),
-          ],
+          colors: Theme.of(
+            context,
+          ).extension<AppThemeExtension>()!.backgroundGradient,
         ),
       ),
       child: Scaffold(
@@ -55,7 +55,7 @@ class PageWelcom extends StatelessWidget {
                             else if (controller.pageIndex.value == 2) ...[
                               Pagetwo(),
                             ],
-                            SizedBox(height: 10),
+                            SizedBox(height: AppSize.sizebetweentexts),
                             //page 3
                             if (controller.pageIndex.value == 3) ...[
                               Pagethree(),
@@ -69,7 +69,7 @@ class PageWelcom extends StatelessWidget {
               ),
               //Slider placement
               Positioned(
-                top: MediaQuery.sizeOf(context).height * 0.79,
+                top: AppSize.size(context).height * 0.79,
                 left: 0,
                 right: 0,
                 child: Center(child: Indexpagewelcom()),

@@ -1,8 +1,9 @@
 // ignore: file_names
 import 'package:get/get.dart';
 import 'package:music_player/core/widgets/splashScreen/splashScreen.dart';
-import 'package:music_player/features/home/pages/homePage.dart';
+import 'package:music_player/features/main/pages/main_screen.dart';
 import 'package:music_player/features/pageWelcom/pageWelcom.dart';
+import 'package:music_player/home/home_page.dart';
 import 'package:music_player/routes/bilding.dart';
 import 'package:music_player/routes/router.dart';
 
@@ -22,9 +23,14 @@ class AppPages {
     ),
     //Create a page for HomePage
     GetPage(
+      name: AppRouter.mainscreen,
+      page: () => MainScreen(),
+      binding: MainScreenBilding(),
+    ),
+    GetPage(
       name: AppRouter.homescreen,
       page: () => HomePage(),
-      binding: WelcomePageBilding(),
+      binding: HomePageBilding(),
     ),
   ];
 }

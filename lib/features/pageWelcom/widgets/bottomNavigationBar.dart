@@ -6,6 +6,8 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/route_manager.dart';
 import 'package:get/state_manager.dart';
+import 'package:music_player/core/constants/appSize.dart';
+import 'package:music_player/core/constants/colors.dart';
 import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
 import 'package:music_player/routes/router.dart';
 
@@ -24,7 +26,7 @@ class BottomNavigationBarwidget extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          backgroundColor: const Color.fromARGB(255, 149, 32, 196),
+          // backgroundColor: ColorBtn.backgroundColorBtnWelcomm,
           padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
         ),
         onPressed: () {
@@ -35,12 +37,13 @@ class BottomNavigationBarwidget extends StatelessWidget {
                 controller.formkey.currentState?.validate() ?? false;
 
             if (isValid) {
+              controller.saveName();
               Get.offAndToNamed(AppRouter.homescreen);
             } else {
               Get.snackbar(
                 "Error",
                 "You must enter your name.",
-                backgroundColor: Colors.yellow,
+                backgroundColor: Warning.backgroundColorWarningForNameEmpty,
                 colorText: Colors.black,
               );
             }
@@ -54,11 +57,7 @@ class BottomNavigationBarwidget extends StatelessWidget {
         child: Obx(() {
           return Text(
             controller.pageIndex.value == 3 ? "Get Started" : "Next",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.labelMedium,
           );
         }),
       ),

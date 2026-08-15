@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 import 'package:get/get.dart';
+import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/routes/router.dart';
 
 class SplashScreenController extends GetxController {
@@ -12,7 +13,11 @@ class SplashScreenController extends GetxController {
 
   void splahScreen() {
     Future.delayed(Duration(seconds: 3), () {
-      Get.offAndToNamed(AppRouter.welcomepage);
+      if (Storage().isFoundName()) {
+        Get.offAndToNamed(AppRouter.mainscreen);
+      } else {
+        Get.offAndToNamed(AppRouter.welcomepage);
+      }
     });
   }
 }

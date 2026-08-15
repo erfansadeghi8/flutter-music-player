@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/widgets/splashScreen/splashScreenController/splashScreenController.dart';
 
 class Splashscreen extends StatelessWidget {
@@ -33,7 +34,7 @@ class Splashscreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: AppSize.sizebetweentexts), // 20
             //Placing the loading app
             CircularProgressIndicator(),
           ],
