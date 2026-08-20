@@ -1,12 +1,10 @@
-// ignore: file_names
-// ignore_for_file: unnecessary_import
+// ignore_for_file: file_names, unnecessary_import
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/utils.dart';
 import 'package:music_player/core/constants/appSize.dart';
-import 'package:music_player/core/constants/colors.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
 import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
 import 'package:music_player/features/pageWelcom/widgets/bottomNavigationBar.dart';

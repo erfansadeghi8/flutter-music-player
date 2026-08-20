@@ -1,4 +1,4 @@
-// ignore: file_names
+// ignore_for_file: file_names
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/services/storage.dart';

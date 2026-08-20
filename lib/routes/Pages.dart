@@ -1,4 +1,4 @@
-// ignore: file_names
+// ignore_for_file: file_names
 import 'package:get/get.dart';
 import 'package:music_player/core/widgets/splashScreen/splashScreen.dart';
 import 'package:music_player/features/main/pages/main_screen.dart';
@@ -25,7 +25,7 @@ class AppPages {
     GetPage(
       name: AppRouter.mainscreen,
       page: () => MainScreen(),
-      binding: MainScreenBilding(),
+      bindings: [MainScreenBilding(), SongControllerBilding()],
     ),
     GetPage(
       name: AppRouter.homescreen,

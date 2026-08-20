@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class TitleAllSongs extends StatelessWidget {
   const TitleAllSongs({super.key});
@@ -11,12 +10,12 @@ class TitleAllSongs extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text("All Songs", style: Theme.of(context).textTheme.labelMedium),
-        TextButton(
-          onPressed: () {
-            print("ok1");
-          },
-          child: Text("See All", style: Theme.of(context).textTheme.titleSmall),
-        ),
+        // TextButton(
+        //   onPressed: () {
+        //     print("ok1");
+        //   },
+        //   child: Text("See All", style: Theme.of(context).textTheme.titleSmall),
+        // ),
       ],
     );
   }

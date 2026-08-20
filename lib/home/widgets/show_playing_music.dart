@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class ShowPlayingMusic extends StatelessWidget {
   ShowPlayingMusic({super.key});
   final controller = Get.put(HomeController());
+  final songController = Get.put(SongController());
 
   @override
   Widget build(BuildContext context) {
+    final objectMusicPlay = songController.songRecently.last;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
@@ -33,10 +36,14 @@ class ShowPlayingMusic extends StatelessWidget {
                     height: 70,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: AssetImage(
-                          "assets/RecentlyMusic/imageRecently.jpg",
-                        ),
+                    ),
+                    child: QueryArtworkWidget(
+                      id: objectMusicPlay.id,
+                      type: ArtworkType.AUDIO,
+                      artworkFit: BoxFit.cover,
+                      artworkBorder: BorderRadius.circular(8),
+                      nullArtworkWidget: Image.asset(
+                        "assets/RecentlyMusic/null_is_poster2.jpg",
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -44,14 +51,17 @@ class ShowPlayingMusic extends StatelessWidget {
                   SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Soyo Your Toors",
+                        objectMusicPlay.title,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
-                        "The wooman",
+                        objectMusicPlay.artist ?? "Unknown Artist",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],
@@ -71,8 +81,8 @@ class ShowPlayingMusic extends StatelessWidget {
                       controller.isplay.value = !controller.isplay.value;
                     },
                     icon: controller.isplay.value
-                        ? Icon(Icons.play_arrow_outlined, size: 40)
-                        : Icon(Icons.pause_outlined, size: 40),
+                        ? Icon(Icons.pause_outlined, size: 40)
+                        : Icon(Icons.play_arrow_outlined, size: 40),
                   );
                 }),
               ),

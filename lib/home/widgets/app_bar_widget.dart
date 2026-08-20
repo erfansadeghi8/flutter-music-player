@@ -1,10 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
-import 'package:music_player/home/homeController/home_controller.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final nameStorage = Storage();
@@ -56,6 +54,5 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  // TODO: implement preferredSize
   Size get preferredSize => const Size.fromHeight(90);
 }
