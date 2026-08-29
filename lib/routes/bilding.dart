@@ -12,6 +12,7 @@ class splashScreenPageBilding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => SplashScreenController());
+    Get.lazyPut(() => MainController());
   }
 }
 

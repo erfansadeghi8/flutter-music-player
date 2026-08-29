@@ -16,6 +16,7 @@ class ColorBtn {
   );
   static const Color colorTextLightModeBtn = Color.fromARGB(255, 0, 0, 0);
   static const Color colorTextDarkModeBtn = Color.fromARGB(255, 255, 255, 255);
+  static const Color colorNotActiveSwichTimer = Color.fromARGB(220, 92, 92, 92);
 }
 
 //colors for Text
@@ -84,4 +85,24 @@ class GradientColor {
     Color(0xFFEED8F8),
     Color(0xFFE4C4F3),
   ];
+}
+
+class BackgrandPageTimer {
+  static const List<Color> backgroundTimerDarkMode = [
+    Color(0xFF010514), // آبی-بنفش خیلی تیره
+    Color(0xFF0D0422), // بنفش تیره
+    Color(0xFF1A0A35), // بنفش-آبی
+    Color(0xFF0F0630), // بنفش تیره با کمی آبی
+  ];
+  static const List<Color> backgroundTimerLightMode = [
+    Color(0xFFFCF8FF), // کرم مایل به بنفش
+    Color(0xFFF5E8FD), // بنفش بسیار ملایم
+    Color(0xFFEAD5F7), // بنفش روشن
+    Color(0xFFE0C2F0), // بنفش متوسط ملایم
+  ];
+}
+
+class shadow {
+  static const shadowAboutAppDarkMode = Color.fromARGB(255, 253, 253, 253);
+  static const shadowAboutAppLightMode = Color.fromARGB(255, 0, 0, 0);
 }

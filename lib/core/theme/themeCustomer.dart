@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/constants/colors.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
+import 'package:music_player/core/theme/app_theme_extension_timer.dart';
 
 class ThemeCustomer {
   final themelightMode = ThemeData(
@@ -43,9 +44,17 @@ class ThemeCustomer {
         fontSize: 14,
         fontWeight: FontWeight.bold,
       ),
+      labelLarge: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      titleLarge: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.w400,
+      ),
     ),
-    iconTheme: IconThemeData(color: Colors.black),
-
     inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: Color.fromARGB(78, 15, 15, 15),
@@ -86,6 +95,9 @@ class ThemeCustomer {
       AppThemeExtension(
         backgroundGradient: GradientColor.backgroundHomeAndWelcomPageLightMode,
       ),
+      AppThemeExtensionTimer(
+        backgroundGradient: BackgrandPageTimer.backgroundTimerLightMode,
+      ),
     ],
     appBarTheme: AppBarTheme(
       // backgroundColor: const Color.fromARGB(255, 255, 254, 254),
@@ -104,7 +116,6 @@ class ThemeCustomer {
         ),
       ),
     ),
-
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
 
@@ -128,6 +139,26 @@ class ThemeCustomer {
 
       type: BottomNavigationBarType.fixed,
     ),
+    iconTheme: IconThemeData(color: const Color.fromARGB(255, 0, 0, 0)),
+    primaryIconTheme: IconThemeData(
+      color: const Color.fromARGB(255, 0, 143, 71),
+    ),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return ColorBtn.backgroundColorBtnWelcommlightMode; // روشن
+        }
+
+        return ColorBtn.colorNotActiveSwichTimer; // خاموش
+      }),
+
+      thumbColor: WidgetStateProperty.all(Colors.white),
+
+      overlayColor: WidgetStateProperty.all(
+        ColorBtn.backgroundColorBtnWelcommDarkmode,
+      ),
+    ),
+    brightness: Brightness.light,
   );
 
   final themedartMode = ThemeData(
@@ -168,8 +199,17 @@ class ThemeCustomer {
         fontSize: 14,
         fontWeight: FontWeight.bold,
       ),
+      labelLarge: TextStyle(
+        color: Colors.black,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      titleLarge: TextStyle(
+        color: Colors.black,
+        fontSize: 20,
+        fontWeight: FontWeight.w400,
+      ),
     ),
-    iconTheme: IconThemeData(color: Colors.white),
     inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: Color.fromARGB(78, 255, 255, 255),
@@ -209,6 +249,9 @@ class ThemeCustomer {
     extensions: const [
       AppThemeExtension(
         backgroundGradient: GradientColor.backgroundHomeAndWelcomPageDarMode,
+      ),
+      AppThemeExtensionTimer(
+        backgroundGradient: BackgrandPageTimer.backgroundTimerDarkMode,
       ),
     ],
     appBarTheme: AppBarTheme(
@@ -250,5 +293,25 @@ class ThemeCustomer {
 
       type: BottomNavigationBarType.fixed,
     ),
+    primaryIconTheme: IconThemeData(
+      color: const Color.fromARGB(255, 0, 143, 71),
+    ),
+    iconTheme: IconThemeData(color: Colors.white),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return ColorBtn.backgroundColorBtnWelcommDarkmode; // روشن
+        }
+
+        return ColorBtn.colorNotActiveSwichTimer; // خاموش
+      }),
+
+      thumbColor: WidgetStateProperty.all(Colors.white),
+
+      overlayColor: WidgetStateProperty.all(
+        ColorBtn.backgroundColorBtnWelcommDarkmode,
+      ),
+    ),
+    brightness: Brightness.dark,
   );
 }

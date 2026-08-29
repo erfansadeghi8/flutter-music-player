@@ -5,6 +5,7 @@ import 'package:music_player/core/theme/app_theme_extension.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/features/main/widgets/bottomnavbar.dart';
+import 'package:music_player/features/main/widgets/drawer_widget.dart';
 import 'package:music_player/home/widgets/app_bar_widget.dart';
 import 'package:music_player/home/widgets/show_playing_music.dart';
 
@@ -15,7 +16,9 @@ class MainScreen extends StatelessWidget {
   final nameStorage = Storage();
   @override
   Widget build(BuildContext context) {
+    // ignore: avoid_print
     return Scaffold(
+      drawer: DrawerWidget(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Obx(
@@ -46,6 +49,7 @@ class MainScreen extends StatelessWidget {
               //Show playing music
               // ignore: unrelated_type_equality_checks
               Obx(() {
+                // ignore: unrelated_type_equality_checks
                 if (controller.selectedNavbar == 0 &&
                     songController.songRecently.isNotEmpty) {
                   return ShowPlayingMusic();

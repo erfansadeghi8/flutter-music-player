@@ -18,6 +18,11 @@ dependencies:
   get_storage: ^2.1.1
   asset_image_generator: ^3.1.1
   on_audio_query: ^2.9.0
+  numberpicker: ^2.1.2
+  firebase_core: ^4.14.0
+  firebase_analytics: ^12.5.0
+  firebase_crashlytics: ^5.3.0
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

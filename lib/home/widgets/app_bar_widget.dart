@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
+import 'package:music_player/data/models/date_time_day.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final nameStorage = Storage();
@@ -25,14 +26,18 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       leading: IconButton(
         onPressed: () {
-          print("ok");
+          Scaffold.of(context).openDrawer();
         },
-        icon: Icon(Icons.menu_rounded),
+        icon: Icon(Icons.menu),
+        style: IconButton.styleFrom(backgroundColor: Colors.transparent),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("GoodMorning", style: Theme.of(context).textTheme.displaySmall),
+          Text(
+            DateTimeDay().dateTimeOfDayFun(),
+            style: Theme.of(context).textTheme.displaySmall,
+          ),
           SizedBox(height: 4),
           Text(
             "${nameStorage.readName()} 😉",
