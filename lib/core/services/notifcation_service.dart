@@ -74,7 +74,7 @@ class NotificationService {
     await notificationsPlugin.show(
       id: notificaionId,
       title: "Lyra",
-      body: "Sleep Timer . ${remainingTime}",
+      body: "Sleep Timer . $remainingTime",
       notificationDetails: notificationDetails,
     );
   }

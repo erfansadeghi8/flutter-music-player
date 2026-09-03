@@ -16,6 +16,7 @@ class Storage {
     return userName != null && userName.toString().isNotEmpty;
   }
 
+  // ignore: strict_top_level_inference
   Future<void> saveReently(data) async {
     await box.write("recentlySong", data);
   }

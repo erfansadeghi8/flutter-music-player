@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:get/get.dart';
 import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/data/models/model_recently_song.dart';
