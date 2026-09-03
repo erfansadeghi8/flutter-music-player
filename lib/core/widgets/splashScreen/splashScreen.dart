@@ -21,11 +21,12 @@ class Splashscreen extends StatelessWidget {
             //Placing an icon for Lodygin
             Image.asset(
               "assets/icon/icon_app.png",
-              width: 300,
-              height: 300,
+              width: 150,
+              height: 150,
               fit: BoxFit.cover,
             ),
             //Placement
+            SizedBox(height: 20),
             Text(
               "Lyia",
               style: TextStyle(

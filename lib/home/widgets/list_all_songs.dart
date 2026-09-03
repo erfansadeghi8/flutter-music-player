@@ -29,12 +29,7 @@ class ListAllSongs extends StatelessWidget {
                 final listAllSongs = songController.songs[index];
                 return InkWell(
                   onTap: () {
-                    var isExist = songController.songRecently.any(
-                      (song) => song.id == listAllSongs.id,
-                    );
-                    if (!isExist) {
-                      songController.songRecently.add(listAllSongs);
-                    }
+                    songController.addRecentlySong(listAllSongs.id);
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 10),

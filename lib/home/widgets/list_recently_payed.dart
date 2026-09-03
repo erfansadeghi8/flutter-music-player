@@ -46,11 +46,14 @@ class ListRecentlyPayed extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 5),
-                      Text(
-                        listmusicrecently.title,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                      SizedBox(
+                        width: 110,
+                        child: Text(
+                          listmusicrecently.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
                       Text(
                         listmusicrecently.artist ?? "Unknown Artist",

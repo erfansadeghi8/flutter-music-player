@@ -4,6 +4,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
+import 'package:music_player/core/widgets/widget_timer.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/features/main/widgets/about_app.dart';
 import 'package:music_player/features/main/widgets/show_modal_timer.dart';
@@ -11,6 +12,7 @@ import 'package:music_player/features/main/widgets/show_modal_timer.dart';
 class DrawerWidget extends StatelessWidget {
   DrawerWidget({super.key});
   final controller = Get.find<MainController>();
+  final controllerWidgetTimer = Get.put(WidgetTimer());
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +250,9 @@ class DrawerWidget extends StatelessWidget {
                       Switch(
                         value: controller.isActiveTimer.value,
                         onChanged: (value) {
+                          if (!controller.isActiveTimer.value) {
+                            controllerWidgetTimer.stop();
+                          }
                           controller.isActiveTimer.value = value;
                         },
                       ),

@@ -15,4 +15,12 @@ class Storage {
     final userName = box.read("name");
     return userName != null && userName.toString().isNotEmpty;
   }
+
+  Future<void> saveReently(data) async {
+    await box.write("recentlySong", data);
+  }
+
+  List readSaveRecentlySong() {
+    return box.read("recentlySong") ?? [];
+  }
 }

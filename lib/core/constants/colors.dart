@@ -102,6 +102,7 @@ class BackgrandPageTimer {
   ];
 }
 
+// ignore: camel_case_types
 class shadow {
   static const shadowAboutAppDarkMode = Color.fromARGB(255, 253, 253, 253);
   static const shadowAboutAppLightMode = Color.fromARGB(255, 0, 0, 0);

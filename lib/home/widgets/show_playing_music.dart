@@ -29,44 +29,51 @@ class ShowPlayingMusic extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // row iamge and text
-              Row(
-                children: [
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: QueryArtworkWidget(
-                      id: objectMusicPlay.id,
-                      type: ArtworkType.AUDIO,
-                      artworkFit: BoxFit.cover,
-                      artworkBorder: BorderRadius.circular(8),
-                      nullArtworkWidget: Image.asset(
-                        "assets/RecentlyMusic/null_is_poster2.jpg",
-                        fit: BoxFit.cover,
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: QueryArtworkWidget(
+                        id: objectMusicPlay.id,
+                        type: ArtworkType.AUDIO,
+                        artworkFit: BoxFit.cover,
+                        artworkBorder: BorderRadius.circular(10),
+                        nullArtworkWidget: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            "assets/RecentlyMusic/null_is_poster2.jpg",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        objectMusicPlay.title,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: Theme.of(context).textTheme.titleMedium,
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            objectMusicPlay.title,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            objectMusicPlay.artist ?? "Unknown Artist",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
                       ),
-                      Text(
-                        objectMusicPlay.artist ?? "Unknown Artist",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 16),

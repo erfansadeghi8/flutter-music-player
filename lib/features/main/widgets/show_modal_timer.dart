@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/route_manager.dart';
 import 'package:get/state_manager.dart';
-import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/theme/app_theme_extension_timer.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
@@ -60,7 +59,7 @@ class ShowModalTimer extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               child: Container(
                 width: double.infinity,
-                height: 350,
+                height: 320,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   color: const Color.fromARGB(73, 143, 142, 142),
@@ -104,13 +103,17 @@ class ShowModalTimer extends StatelessWidget {
                                 .textTheme
                                 .labelMedium
                                 ?.copyWith(
-                                  color: Colors.white,
+                                  // color: Colors.white,
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
 
                             onChanged: (value) {
                               controller.hour.value = value;
+                              controllerWidgetTimer.timerPusseMusic(
+                                controller.hour.value,
+                                controller.minute.value,
+                              );
                             },
                           ),
 
@@ -144,13 +147,17 @@ class ShowModalTimer extends StatelessWidget {
                                 .textTheme
                                 .labelMedium
                                 ?.copyWith(
-                                  color: Colors.white,
+                                  // color: Colors.white,
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
 
                             onChanged: (value) {
                               controller.minute.value = value;
+                              controllerWidgetTimer.timerPusseMusic(
+                                controller.hour.value,
+                                controller.minute.value,
+                              );
                             },
                           ),
 
@@ -171,35 +178,89 @@ class ShowModalTimer extends StatelessWidget {
                 }),
               ),
             ),
-            SizedBox(height: AppSize.height(context) / 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 80, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: controllerWidgetTimer.isTimerRunning.value
-                  ? null
-                  : () {
-                      controllerWidgetTimer.timerPusseMusic(
-                        controller.hour.value,
-                        controller.minute.value,
-                      );
-                    },
-              child: Text(
-                controllerWidgetTimer.isTimerRunning.value
-                    ? 'Timer Running'
-                    : 'Start Timer',
+            SizedBox(height: 10),
+            Obx(
+              () => Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 128, 127, 127),
+                        width: 4,
+                      ),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: CircularProgressIndicator(
+                      value: controllerWidgetTimer.progress.value,
+                      strokeWidth: 8,
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      '${controllerWidgetTimer.hour.value} : ${controllerWidgetTimer.minutes.value} : ${controllerWidgetTimer.seconds.value}',
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+            SizedBox(height: 10),
 
-            // ElevatedButton(
-            //   onPressed: () {
-            //     throw Exception("Test Crashlytics");
-            //   },
-            //   child: const Text("Test Crash"),
-            // ),
+            Obx(() {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 80,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: controllerWidgetTimer.isTimerRunning.value
+                        ? () {
+                            controllerWidgetTimer.stop();
+                          }
+                        : () {
+                            controllerWidgetTimer.start();
+                          },
+                    child: controllerWidgetTimer.isTimerRunning.value
+                        ? Icon(Icons.stop, size: 20)
+                        : Icon(Icons.play_arrow, size: 20),
+                  ),
+                  SizedBox(width: 10),
+                  controllerWidgetTimer.total > 0
+                      ? ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 80,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: controllerWidgetTimer.isTimerRunning.value
+                              ? null
+                              : () {
+                                  controllerWidgetTimer.reset();
+                                },
+                          child: Icon(Icons.restart_alt, size: 20),
+                        )
+                      : SizedBox.shrink(),
+                ],
+              );
+            }),
           ],
         ),
       ),

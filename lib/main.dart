@@ -2,6 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:music_player/core/services/notifcation_service.dart';
 import 'package:music_player/core/theme/themeCustomer.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/routes/Pages.dart';
@@ -22,6 +23,8 @@ Future<void> main() async {
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
 
   runApp(MyApp());
 }

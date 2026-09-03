@@ -27,6 +27,7 @@ class AboutApp extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: Theme.of(context).brightness == Brightness.dark
+                      // ignore: deprecated_member_use
                       ? shadow.shadowAboutAppDarkMode.withOpacity(.5)
                       : const Color.fromARGB(255, 112, 112, 112),
                   spreadRadius: 2, // How much the shadow expands
@@ -83,6 +84,7 @@ class AboutApp extends StatelessWidget {
               height: 220,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
+                // ignore: deprecated_member_use
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(.8))],
                 color: Theme.of(context).brightness == Brightness.dark
                     ? shadow.shadowAboutAppDarkMode
@@ -121,6 +123,7 @@ class AboutApp extends StatelessWidget {
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
+                // ignore: deprecated_member_use
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(.8))],
                 color: Theme.of(context).brightness == Brightness.dark
                     ? shadow.shadowAboutAppDarkMode
@@ -158,6 +161,7 @@ class AboutApp extends StatelessWidget {
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
+                // ignore: deprecated_member_use
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(.8))],
                 color: Theme.of(context).brightness == Brightness.dark
                     ? const Color.fromARGB(255, 255, 255, 255)

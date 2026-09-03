@@ -1,3 +1,7 @@
+import org.gradle.api.tasks.compile.JavaCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")
@@ -13,7 +17,20 @@ subprojects {
 }
 
 subprojects {
-    project.evaluationDependsOn(":app")
+
+    afterEvaluate {
+
+        tasks.withType<JavaCompile>().configureEach {
+            sourceCompatibility = "17"
+            targetCompatibility = "17"
+        }
+
+        tasks.withType<KotlinJvmCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_17)
+            }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {
