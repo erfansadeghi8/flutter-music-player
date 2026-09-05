@@ -4,99 +4,126 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
+import 'package:music_player/home/widgets/show_modal_page_play_music.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class ShowPlayingMusic extends StatelessWidget {
   ShowPlayingMusic({super.key});
   final controller = Get.put(HomeController());
-  final songController = Get.put(SongController());
+  final songController = Get.find<SongController>();
 
   @override
   Widget build(BuildContext context) {
-    final objectMusicPlay = songController.songRecently.last;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: const Color.fromARGB(40, 163, 163, 163),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(4),
-          //row lider
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // row iamge and text
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: QueryArtworkWidget(
-                        id: objectMusicPlay.id,
-                        type: ArtworkType.AUDIO,
-                        artworkFit: BoxFit.cover,
-                        artworkBorder: BorderRadius.circular(10),
-                        nullArtworkWidget: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.asset(
-                            "assets/RecentlyMusic/null_is_poster2.jpg",
-                            fit: BoxFit.cover,
+    return Obx(() {
+      final latestSong = songController.songRecentlyStorage.reduce(
+        (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
+      );
+      final song = songController.songs.firstWhere(
+        (song) => song.id == latestSong.songId,
+      );
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: InkWell(
+          onTap: () {
+            showGeneralDialog(
+              context: context,
+              barrierDismissible: true,
+              barrierLabel: "PlayMusic",
+              transitionDuration: const Duration(milliseconds: 300),
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return ShowModalPagePlayMusic(song: song);
+              },
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: const Color.fromARGB(40, 163, 163, 163),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(4),
+              //row lider
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // row iamge and text
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: QueryArtworkWidget(
+                            id: song.id,
+                            type: ArtworkType.AUDIO,
+                            artworkFit: BoxFit.cover,
+                            artworkBorder: BorderRadius.circular(10),
+                            nullArtworkWidget: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                "assets/RecentlyMusic/null_is_poster2.jpg",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            objectMusicPlay.title,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: Theme.of(context).textTheme.titleMedium,
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                song.title,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                song.artist ?? "Unknown Artist",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            ],
                           ),
-                          Text(
-                            objectMusicPlay.artist ?? "Unknown Artist",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Obx(() {
+                      return IconButton(
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(
+                            Colors.transparent,
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                        ),
+                        onPressed: () {
+                          songController.isplay.value =
+                              !songController.isplay.value;
+                          if (songController.isplay.value) {
+                            songController.audioPlayer.resume();
+                          } else {
+                            songController.audioPlayer.pause();
+                          }
+                        },
+                        icon: songController.isplay.value
+                            ? Icon(Icons.pause_outlined, size: 40)
+                            : Icon(Icons.play_arrow_outlined, size: 40),
+                      );
+                    }),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Obx(() {
-                  return IconButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(
-                        Colors.transparent,
-                      ),
-                    ),
-                    onPressed: () {
-                      controller.isplay.value = !controller.isplay.value;
-                    },
-                    icon: controller.isplay.value
-                        ? Icon(Icons.pause_outlined, size: 40)
-                        : Icon(Icons.play_arrow_outlined, size: 40),
-                  );
-                }),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

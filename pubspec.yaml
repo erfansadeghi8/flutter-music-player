@@ -24,6 +24,7 @@ dependencies:
   firebase_crashlytics: ^5.3.0
   url_launcher: ^6.3.2
   flutter_local_notifications: ^22.3.0
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +38,8 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon_app.png"
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/icon/icon_app.png"
 
 flutter:
   uses-material-design: true

@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/data/models/model_recently_song.dart';
@@ -9,6 +10,13 @@ class SongController extends GetxController {
   final songRecently = <SongModel>[].obs;
   final songRecentlyStorage = <ModelRecentlySong>[].obs;
   final storage = Storage();
+  final AudioPlayer audioPlayer = AudioPlayer();
+  final Rxn<SongModel> currentSong = Rxn<SongModel>();
+  RxBool isplay = false.obs;
+  RxBool isfavoritSong = false.obs;
+  RxInt nextIndex = 0.obs;
+  RxInt backIndex = 0.obs;
+  final Rxn<SongModel> nextAndBackSongMusic = Rxn<SongModel>();
 
   Future<void> loadSongs() async {
     final permission = await audioQuery.permissionsRequest();
@@ -77,11 +85,77 @@ class SongController extends GetxController {
     await loadSongs();
     loadRecentlySong();
     updateRecentlySong();
+    final latestSong = songRecentlyStorage.reduce(
+      (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
+    );
+    final currentIndex = songs.indexWhere(
+      (song) => song.id == latestSong.songId,
+    );
+    currentSong.value = songs[currentIndex];
+  }
+
+  // ignore: strict_top_level_inference
+  Future<void> playeMusic(urlmusic) async {
+    await audioPlayer.play(DeviceFileSource(urlmusic));
+    isplay.value = true;
+  }
+
+  Future<void> nextSong() async {
+    final latestSong = songRecentlyStorage.reduce(
+      (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
+    );
+    final currentIndex = songs.indexWhere(
+      (song) => song.id == latestSong.songId,
+    );
+    nextIndex.value = currentIndex + 1;
+
+    if (nextIndex.value >= songs.length) {
+      nextIndex.value = 0;
+    }
+
+    nextAndBackSongMusic.value = songs[nextIndex.value];
+    currentSong.value = nextAndBackSongMusic.value;
+
+    addRecentlySong(nextAndBackSongMusic.value!.id);
+
+    await audioPlayer.stop();
+
+    await playeMusic(nextAndBackSongMusic.value!.data);
+  }
+
+  Future<void> backSong() async {
+    final latestSong = songRecentlyStorage.reduce(
+      (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
+    );
+    final currentIndex = songs.indexWhere(
+      (song) => song.id == latestSong.songId,
+    );
+    backIndex.value = currentIndex - 1;
+    if (backIndex.value >= 0) {
+      nextAndBackSongMusic.value = songs[backIndex.value];
+      currentSong.value = nextAndBackSongMusic.value;
+      addRecentlySong(nextAndBackSongMusic.value!.id);
+      await audioPlayer.stop();
+      await playeMusic(nextAndBackSongMusic.value!.data);
+    } else {
+      backIndex.value = songs.length - 1;
+      nextAndBackSongMusic.value = songs[backIndex.value];
+      currentSong.value = nextAndBackSongMusic.value;
+      addRecentlySong(nextAndBackSongMusic.value!.id);
+      await audioPlayer.stop();
+      await playeMusic(nextAndBackSongMusic.value!.data);
+    }
   }
 
   @override
   void onInit() {
     super.onInit();
     loadRecentlyData();
+  }
+
+  @override
+  void onClose() {
+    super.onClose();
+    audioPlayer.dispose();
   }
 }

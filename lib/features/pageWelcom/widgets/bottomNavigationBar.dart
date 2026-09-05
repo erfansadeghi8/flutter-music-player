@@ -34,7 +34,7 @@ class BottomNavigationBarwidget extends StatelessWidget {
 
             if (isValid) {
               controller.saveName();
-              Get.offAndToNamed(AppRouter.homescreen);
+              Get.offAndToNamed(AppRouter.mainscreen);
             } else {
               Get.snackbar(
                 "Error",

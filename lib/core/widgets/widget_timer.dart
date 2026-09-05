@@ -57,11 +57,12 @@ class WidgetTimer extends GetxController {
     isTimerRunning.value = true;
   }
 
-  void stop() {
+  void stop() async {
     if (isTimerRunning.value) {
       _timer?.cancel();
     }
     isTimerRunning.value = false;
+    await NotificationService.cancelSleepTimer();
   }
 
   void reset() {

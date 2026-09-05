@@ -12,7 +12,7 @@ import 'package:music_player/home/widgets/show_playing_music.dart';
 class MainScreen extends StatelessWidget {
   MainScreen({super.key});
   final controller = Get.find<MainController>();
-  final songController = Get.put(SongController());
+  final songController = Get.find<SongController>();
   final nameStorage = Storage();
   @override
   Widget build(BuildContext context) {

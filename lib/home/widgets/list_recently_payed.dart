@@ -7,20 +7,21 @@ import 'package:on_audio_query/on_audio_query.dart';
 
 class ListRecentlyPayed extends StatelessWidget {
   ListRecentlyPayed({super.key});
-  final songController = Get.put(SongController());
+  final songController = Get.find<SongController>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final reversedSongs = songController.songRecently.reversed.toList();
       if (songController.songRecently.isNotEmpty) {
         return SizedBox(
           height: AppSize.height(context) / 5,
           child: InkWell(
             child: ListView.builder(
-              itemCount: songController.songRecently.length,
+              itemCount: reversedSongs.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
-                final listmusicrecently = songController.songRecently[index];
+                final listmusicrecently = reversedSongs[index];
                 return Padding(
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Column(

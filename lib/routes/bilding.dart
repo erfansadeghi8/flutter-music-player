@@ -44,5 +44,6 @@ class HomePageBilding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => HomeController());
+    Get.lazyPut(() => MainController());
   }
 }

@@ -9,7 +9,7 @@ import 'package:on_audio_query/on_audio_query.dart';
 
 class ListAllSongs extends StatelessWidget {
   ListAllSongs({super.key});
-  final songController = Get.put(SongController());
+  final songController = Get.find<SongController>();
 
   @override
   Widget build(BuildContext context) {
@@ -27,83 +27,89 @@ class ListAllSongs extends StatelessWidget {
               itemBuilder: (context, index) {
                 // ignore: unused_local_variable
                 final listAllSongs = songController.songs[index];
-                return InkWell(
-                  onTap: () {
-                    songController.addRecentlySong(listAllSongs.id);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: const Color.fromARGB(40, 105, 105, 105),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(4),
-                        //row lider
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // row iamge and text
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 60,
-                                    height: 60,
-                                    clipBehavior: Clip.antiAlias,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: QueryArtworkWidget(
-                                      id: listAllSongs.id,
-                                      type: ArtworkType.AUDIO,
-                                      artworkFit: BoxFit.cover,
-                                      artworkBorder: BorderRadius.circular(8),
-                                      nullArtworkWidget: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image.asset(
-                                          "assets/RecentlyMusic/null_is_poster2.jpg",
-                                          fit: BoxFit.cover,
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () async {
+                      songController.addRecentlySong(listAllSongs.id);
+                      await songController.playeMusic(listAllSongs.data);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: const Color.fromARGB(40, 105, 105, 105),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(4),
+                          //row lider
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // row iamge and text
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      clipBehavior: Clip.antiAlias,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: QueryArtworkWidget(
+                                        id: listAllSongs.id,
+                                        type: ArtworkType.AUDIO,
+                                        artworkFit: BoxFit.cover,
+                                        artworkBorder: BorderRadius.circular(8),
+                                        nullArtworkWidget: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          child: Image.asset(
+                                            "assets/RecentlyMusic/null_is_poster2.jpg",
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          listAllSongs.title,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.titleMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        Text(
-                                          listAllSongs.artist ??
-                                              "Unknown Artist",
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            listAllSongs.title,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            listAllSongs.artist ??
+                                                "Unknown Artist",
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            Image.asset(
-                              "assets/icon/voice.png",
-                              width: 40,
-                              height: 40,
-                            ),
-                          ],
+                              Image.asset(
+                                "assets/icon/voice.png",
+                                width: 40,
+                                height: 40,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

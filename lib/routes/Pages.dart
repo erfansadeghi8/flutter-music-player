@@ -30,7 +30,11 @@ class AppPages {
     GetPage(
       name: AppRouter.homescreen,
       page: () => HomePage(),
-      binding: HomePageBilding(),
+      bindings: [
+        HomePageBilding(),
+        SongControllerBilding(),
+        MainScreenBilding(),
+      ],
     ),
   ];
 }
