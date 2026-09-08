@@ -4,6 +4,8 @@ import 'package:get_storage/get_storage.dart';
 class HomeController extends GetxController {
   RxInt selectedIndexListSong = 0.obs;
   RxInt selectedNavbar = 0.obs;
+  RxBool isEqualizer = false.obs;
+  RxInt selectedIndexEqualizer = 0.obs;
 
   final storage = GetStorage();
 }

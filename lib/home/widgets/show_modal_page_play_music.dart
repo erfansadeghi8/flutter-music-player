@@ -3,12 +3,13 @@ import 'package:get/get.dart';
 import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/constants/colors.dart';
 import 'package:music_player/core/theme/app_theme_extension_timer.dart';
+import 'package:music_player/core/widgets/music_animation_widget/music_animation_widget.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
+import 'package:music_player/home/widgets/modal_control_voice_song.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class ShowModalPagePlayMusic extends StatelessWidget {
-  ShowModalPagePlayMusic({super.key, required this.song});
-  final SongModel song;
+  ShowModalPagePlayMusic({super.key});
   final songController = Get.find<SongController>();
 
   @override
@@ -41,17 +42,41 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                       },
                       icon: Icon(Icons.arrow_drop_down_outlined, size: 40),
                     ),
-                    Text(
-                      "Playing music",
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
+                    songController.isplay.value
+                        ? SizedBox(
+                            width: 100,
+                            height: 100,
+                            child: MusicAnimationWidget(),
+                          )
+                        : SizedBox(
+                            height: 100,
+                            child: Center(
+                              child: Text(
+                                textAlign: TextAlign.center,
+
+                                "Playing music",
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                            ),
+                          ),
                     IconButton(
                       style: ButtonStyle(
                         backgroundColor: WidgetStatePropertyAll(
                           Colors.transparent,
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        showGeneralDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          barrierLabel: "equalizer",
+                          transitionDuration: const Duration(milliseconds: 300),
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) {
+                                return ModalControlVoiceSong();
+                              },
+                        );
+                      },
                       icon: Icon(Icons.more_vert, size: 40),
                     ),
                   ],
@@ -93,47 +118,61 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  songController.currentSong.value!.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .copyWith(fontSize: 20),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  songController.currentSong.value!.artist ??
-                                      "Unknown Artist",
-                                  style: Theme.of(context).textTheme.labelSmall!
-                                      .copyWith(fontSize: 20),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStatePropertyAll(
-                                  Colors.transparent,
-                                ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    songController.currentSong.value!.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontSize: 20),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    songController.currentSong.value!.artist ??
+                                        "Unknown Artist",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall!
+                                        .copyWith(fontSize: 20),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                              onPressed: () {
-                                songController.isfavoritSong.value =
-                                    !songController.isfavoritSong.value;
-                              },
-
-                              icon: songController.isfavoritSong.value
-                                  ? Icon(
-                                      Icons.favorite,
-                                      size: 25,
-                                      color: Colors.redAccent,
-                                    )
-                                  : Icon(Icons.favorite_border, size: 25),
                             ),
+                            Obx(() {
+                              final current = songController.currentSong.value;
+
+                              if (current == null) {
+                                return const SizedBox();
+                              }
+
+                              final isFavorite = songController.favoriteSongs
+                                  .any((item) => item.songId == current.id);
+
+                              return IconButton(
+                                style: ButtonStyle(
+                                  backgroundColor: WidgetStatePropertyAll(
+                                    Colors.transparent,
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await songController.toggleFavorite(
+                                    current.id,
+                                  );
+                                },
+                                icon: isFavorite
+                                    ? Icon(
+                                        Icons.favorite_border,
+                                        color: Colors.red,
+                                      )
+                                    : Icon(Icons.favorite_outline),
+                              );
+                            }),
                           ],
                         ),
                       ),
@@ -160,9 +199,20 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                             children: [
                               Slider(
                                 min: 0,
-                                max: 100,
-                                value: 20,
-                                onChanged: (value) {},
+                                max: songController.tottalTime.value.inSeconds
+                                    .toDouble(),
+                                value: songController.friesTime.value.inSeconds
+                                    .toDouble()
+                                    .clamp(
+                                      0,
+                                      songController.tottalTime.value.inSeconds
+                                          .toDouble(),
+                                    ),
+                                onChanged: (value) {
+                                  songController.audioPlayer.seek(
+                                    Duration(seconds: value.toInt()),
+                                  );
+                                },
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(
@@ -172,7 +222,14 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
-                                  children: [Text("00:00"), Text("3:20")],
+                                  children: [
+                                    Text(
+                                      "${songController.friesTime.value.inMinutes.toString().padLeft(2, '0')}:${(songController.friesTime.value.inSeconds % 60).toString().padLeft(2, '0')}",
+                                    ),
+                                    Text(
+                                      "${songController.tottalTime.value.inMinutes.toString().padLeft(2, '0')}:${(songController.tottalTime.value.inSeconds % 60).toString().padLeft(2, '0')}",
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -192,11 +249,18 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                         IconButton(
                           style: ButtonStyle(
                             backgroundColor: WidgetStatePropertyAll(
-                              Colors.transparent,
+                              songController.isrendom.value
+                                  ? const Color.fromARGB(144, 31, 105, 128)
+                                  : Colors.transparent,
                             ),
                           ),
-                          onPressed: () {},
-                          icon: Icon(Icons.shuffle, size: 30),
+                          onPressed: () {
+                            songController.isrendom.value =
+                                !songController.isrendom.value;
+                          },
+                          icon: songController.isrendom.value
+                              ? Icon(Icons.shuffle_on_outlined, size: 30)
+                              : Icon(Icons.shuffle, size: 30),
                         ),
                         IconButton(
                           style: ButtonStyle(
@@ -215,13 +279,15 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                               ColorBtn.backgroundColorBtnWelcommDarkmode,
                             ),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             if (songController.isplay.value) {
-                              songController.audioPlayer.pause();
+                              await songController.audioPlayer.pause();
                               songController.isplay.value = false;
                             } else {
-                              songController.playeMusic(song.data);
-                              songController.isplay.value = false;
+                              await songController.playeMusic(
+                                songController.currentSong.value!.data,
+                              );
+                              songController.isplay.value = true;
                             }
                           },
                           icon: songController.isplay.value
@@ -245,8 +311,13 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                               Colors.transparent,
                             ),
                           ),
-                          onPressed: () {},
-                          icon: Icon(Icons.repeat, size: 30),
+                          onPressed: () {
+                            songController.isRepet.value =
+                                !songController.isRepet.value;
+                          },
+                          icon: songController.isRepet.value
+                              ? Icon(Icons.repeat_on, size: 30)
+                              : Icon(Icons.repeat, size: 30),
                         ),
                       ],
                     ),

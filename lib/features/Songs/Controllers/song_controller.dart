@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/services/storage.dart';
+import 'package:music_player/data/models/model_favorite_songs.dart';
 import 'package:music_player/data/models/model_recently_song.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
@@ -9,14 +12,20 @@ class SongController extends GetxController {
   final songs = <SongModel>[].obs;
   final songRecently = <SongModel>[].obs;
   final songRecentlyStorage = <ModelRecentlySong>[].obs;
+  final favoriteSongs = <ModelFavoriteSongs>[].obs;
   final storage = Storage();
   final AudioPlayer audioPlayer = AudioPlayer();
   final Rxn<SongModel> currentSong = Rxn<SongModel>();
+  final Rxn<SongModel> nextAndBackSongMusic = Rxn<SongModel>();
+  final friesTime = Duration().obs;
+  final tottalTime = Duration().obs;
+  final randoIndex = Random();
   RxBool isplay = false.obs;
-  RxBool isfavoritSong = false.obs;
   RxInt nextIndex = 0.obs;
   RxInt backIndex = 0.obs;
-  final Rxn<SongModel> nextAndBackSongMusic = Rxn<SongModel>();
+  RxBool isRepet = false.obs;
+  RxBool isrendom = false.obs;
+  int get randomnInt => randoIndex.nextInt(songs.length) + 0;
 
   Future<void> loadSongs() async {
     final permission = await audioQuery.permissionsRequest();
@@ -107,7 +116,11 @@ class SongController extends GetxController {
     final currentIndex = songs.indexWhere(
       (song) => song.id == latestSong.songId,
     );
-    nextIndex.value = currentIndex + 1;
+    if (isrendom.value) {
+      nextIndex.value = randomnInt;
+    } else {
+      nextIndex.value = currentIndex + 1;
+    }
 
     if (nextIndex.value >= songs.length) {
       nextIndex.value = 0;
@@ -147,10 +160,48 @@ class SongController extends GetxController {
     }
   }
 
+  void initplayer() {
+    audioPlayer.onPositionChanged.listen((pos) {
+      friesTime.value = pos;
+    });
+
+    audioPlayer.onDurationChanged.listen((pos) {
+      tottalTime.value = pos;
+    });
+
+    audioPlayer.onPlayerComplete.listen((_) async {
+      if (isRepet.value) {
+        playeMusic(currentSong.value!.data);
+      } else {
+        nextSong();
+      }
+    });
+  }
+
+  Future<void> toggleFavorite(int songid) async {
+    final index = favoriteSongs.indexWhere((song) => song.songId == songid);
+
+    if (index >= 0) {
+      favoriteSongs.removeAt(index);
+    } else {
+      favoriteSongs.add(ModelFavoriteSongs(isFavorite: true, songId: songid));
+    }
+
+    await saveToFavorite();
+  }
+
+  Future<void> saveToFavorite() async {
+    final data = favoriteSongs.map((song) {
+      return song.tostring();
+    }).toList();
+    await storage.saveFavorite(data);
+  }
+
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    loadRecentlyData();
+    await loadRecentlyData();
+    initplayer();
   }
 
   @override

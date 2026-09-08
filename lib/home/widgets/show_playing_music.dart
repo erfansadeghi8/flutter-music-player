@@ -31,7 +31,7 @@ class ShowPlayingMusic extends StatelessWidget {
               barrierLabel: "PlayMusic",
               transitionDuration: const Duration(milliseconds: 300),
               pageBuilder: (context, animation, secondaryAnimation) {
-                return ShowModalPagePlayMusic(song: song);
+                return ShowModalPagePlayMusic();
               },
             );
           },

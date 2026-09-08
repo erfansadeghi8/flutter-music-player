@@ -21,6 +21,15 @@ class Storage {
     await box.write("recentlySong", data);
   }
 
+  // ignore: strict_top_level_inference
+  Future<void> saveFavorite(data) async {
+    await box.write("favoriteSongs", data);
+  }
+
+  List readFavoriteSongsList() {
+    return box.read("favoriteSongs") ?? [];
+  }
+
   List readSaveRecentlySong() {
     return box.read("recentlySong") ?? [];
   }
