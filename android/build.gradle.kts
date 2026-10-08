@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.gradle.api.file.Directory
 
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
@@ -17,12 +18,11 @@ subprojects {
 }
 
 subprojects {
-
     afterEvaluate {
 
         tasks.withType<JavaCompile>().configureEach {
-            sourceCompatibility = "17"
-            targetCompatibility = "17"
+            sourceCompatibility = JavaVersion.VERSION_17.toString()
+            targetCompatibility = JavaVersion.VERSION_17.toString()
         }
 
         tasks.withType<KotlinJvmCompile>().configureEach {

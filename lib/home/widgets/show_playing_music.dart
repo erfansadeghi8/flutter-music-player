@@ -22,7 +22,7 @@ class ShowPlayingMusic extends StatelessWidget {
         (song) => song.id == latestSong.songId,
       );
       return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 10, left: 8, right: 8),
         child: InkWell(
           onTap: () {
             showGeneralDialog(
@@ -103,13 +103,11 @@ class ShowPlayingMusic extends StatelessWidget {
                             Colors.transparent,
                           ),
                         ),
-                        onPressed: () {
-                          songController.isplay.value =
-                              !songController.isplay.value;
+                        onPressed: () async {
                           if (songController.isplay.value) {
-                            songController.audioPlayer.resume();
+                            songController.pussMusic();
                           } else {
-                            songController.audioPlayer.pause();
+                            await songController.playeMusic(song.data);
                           }
                         },
                         icon: songController.isplay.value

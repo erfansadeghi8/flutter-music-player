@@ -31,6 +31,8 @@ class ListAllSongs extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () async {
+                      await songController.resetCurrentPostion();
+                      await songController.audioPlayer.stop();
                       songController.addRecentlySong(listAllSongs.id);
                       await songController.playeMusic(listAllSongs.data);
                     },

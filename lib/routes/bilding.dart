@@ -1,6 +1,7 @@
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/get_instance.dart';
 import 'package:music_player/core/widgets/splashScreen/splashScreenController/splashScreenController.dart';
+import 'package:music_player/features/EqualizerPage/equalizerController/equalizer_page_controller.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
@@ -37,6 +38,7 @@ class SongControllerBilding extends Bindings {
   @override
   void dependencies() {
     Get.put(SongController());
+    Get.lazyPut(() => EqualizerController());
   }
 }
 
@@ -45,5 +47,12 @@ class HomePageBilding extends Bindings {
   void dependencies() {
     Get.lazyPut(() => HomeController());
     Get.lazyPut(() => MainController());
+  }
+}
+
+class EqualizerBilding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut(() => EqualizerController());
   }
 }

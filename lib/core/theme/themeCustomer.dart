@@ -36,22 +36,22 @@ class ThemeCustomer {
       ),
       titleSmall: TextStyle(
         color: ColorText.colorTextButtonLight,
-        fontSize: 18,
+        fontSize: AppSize.iconSmall,
         fontWeight: FontWeight.w400,
       ),
       titleMedium: TextStyle(
         color: Colors.black,
-        fontSize: 14,
+        fontSize: AppSize.fontMD,
         fontWeight: FontWeight.bold,
       ),
       labelLarge: TextStyle(
         color: Colors.white,
-        fontSize: 20,
+        fontSize: AppSize.md,
         fontWeight: FontWeight.bold,
       ),
       titleLarge: TextStyle(
         color: Colors.white,
-        fontSize: 20,
+        fontSize: AppSize.md,
         fontWeight: FontWeight.w400,
       ),
     ),
@@ -159,6 +159,11 @@ class ThemeCustomer {
       ),
     ),
     brightness: Brightness.light,
+    radioTheme: RadioThemeData(
+      fillColor: WidgetStatePropertyAll(
+        const Color.fromARGB(255, 39, 193, 240),
+      ),
+    ),
   );
 
   final themedartMode = ThemeData(
@@ -191,22 +196,22 @@ class ThemeCustomer {
       ),
       titleSmall: TextStyle(
         color: ColorText.colorTextButtonDark,
-        fontSize: 18,
+        fontSize: AppSize.iconSmall,
         fontWeight: FontWeight.w400,
       ),
       titleMedium: TextStyle(
         color: Colors.white,
-        fontSize: 14,
+        fontSize: AppSize.fontMD,
         fontWeight: FontWeight.bold,
       ),
       labelLarge: TextStyle(
         color: Colors.black,
-        fontSize: 20,
+        fontSize: AppSize.md,
         fontWeight: FontWeight.bold,
       ),
       titleLarge: TextStyle(
         color: Colors.black,
-        fontSize: 20,
+        fontSize: AppSize.md,
         fontWeight: FontWeight.w400,
       ),
     ),
@@ -313,5 +318,10 @@ class ThemeCustomer {
       ),
     ),
     brightness: Brightness.dark,
+    radioTheme: RadioThemeData(
+      fillColor: WidgetStatePropertyAll(
+        const Color.fromARGB(255, 99, 219, 255),
+      ),
+    ),
   );
 }

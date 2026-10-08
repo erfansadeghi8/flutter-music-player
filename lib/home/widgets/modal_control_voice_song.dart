@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/constants/appSize.dart';
+import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
 
 class ModalControlVoiceSong extends StatelessWidget {
   ModalControlVoiceSong({super.key});
   final controllerHomePage = Get.find<HomeController>();
+  final controllerSong = Get.find<SongController>();
 
   @override
   Widget build(BuildContext context) {
@@ -297,16 +299,19 @@ class ModalControlVoiceSong extends StatelessWidget {
                               overlayShape: SliderComponentShape.noOverlay,
                             ),
                             child: Slider(
-                              value: 5.0,
-                              min: -10.0,
-                              max: 10.0,
-                              onChanged: (value) {},
+                              value: controllerSong.valueVolum.value,
+                              min: 0.0,
+                              max: 1.0,
+                              onChanged: (value) {
+                                controllerSong.valueVolum.value = value;
+                                controllerSong.volumSong();
+                              },
                             ),
                           ),
                         ),
                       ),
                       Text(
-                        "100",
+                        "${(controllerSong.valueVolum.value * 100).toInt()}",
                         style: Theme.of(context).textTheme.displaySmall,
                       ),
                     ],
@@ -331,16 +336,21 @@ class ModalControlVoiceSong extends StatelessWidget {
                               overlayShape: SliderComponentShape.noOverlay,
                             ),
                             child: Slider(
-                              value: 5.0,
-                              min: -10.0,
-                              max: 10.0,
-                              onChanged: (value) {},
+                              value: controllerSong.speedSongValue.value,
+                              min: 0.25,
+                              max: 4.0,
+                              onChanged: (value) {
+                                controllerSong.speedSongValue.value = value;
+                                controllerSong.speedSong();
+                              },
                             ),
                           ),
                         ),
                       ),
                       Text(
-                        "100",
+                        (controllerSong.speedSongValue.value)
+                            .toStringAsFixed(1)
+                            .replaceFirst(RegExp(r'\.0$'), ''),
                         style: Theme.of(context).textTheme.displaySmall,
                       ),
                     ],

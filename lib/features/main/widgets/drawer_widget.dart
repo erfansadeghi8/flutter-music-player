@@ -86,8 +86,8 @@ class DrawerWidget extends StatelessWidget {
                     201,
                     201,
                   ),
-                  collapsedIconColor: Theme.of(context).iconTheme.color,
-                  iconColor: Theme.of(context).primaryIconTheme.color,
+                  collapsedIconColor: Colors.amber,
+                  iconColor: const Color.fromARGB(255, 1, 175, 175),
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -176,8 +176,8 @@ class DrawerWidget extends StatelessWidget {
                     201,
                     201,
                   ),
-                  collapsedIconColor: Theme.of(context).iconTheme.color,
-                  iconColor: Theme.of(context).primaryIconTheme.color,
+                  collapsedIconColor: Colors.blue,
+                  iconColor: Colors.lightGreenAccent,
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,

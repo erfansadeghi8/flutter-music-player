@@ -25,6 +25,9 @@ dependencies:
   url_launcher: ^6.3.2
   flutter_local_notifications: ^22.3.0
   audioplayers: ^6.8.1
+  equalizer_flutter: ^0.0.1
+  just_audio: ^0.9.40
+  marquee: ^2.3.0
 
 dev_dependencies:
   flutter_test:

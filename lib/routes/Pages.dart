@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 import 'package:get/get.dart';
 import 'package:music_player/core/widgets/splashScreen/splashScreen.dart';
+import 'package:music_player/features/EqualizerPage/equalizer_page.dart';
 import 'package:music_player/features/main/pages/main_screen.dart';
 import 'package:music_player/features/pageWelcom/pageWelcom.dart';
 import 'package:music_player/home/home_page.dart';
@@ -35,6 +36,11 @@ class AppPages {
         SongControllerBilding(),
         MainScreenBilding(),
       ],
+    ),
+    GetPage(
+      name: AppRouter.equalizerPage,
+      page: () => EqualizerPage(),
+      binding: EqualizerBilding(),
     ),
   ];
 }

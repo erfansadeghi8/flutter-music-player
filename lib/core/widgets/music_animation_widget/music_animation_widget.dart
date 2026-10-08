@@ -19,7 +19,7 @@ class MusicAnimationWidget extends StatelessWidget {
             width: 5,
             height: height,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: const Color.fromARGB(255, 2, 157, 204),
               borderRadius: BorderRadius.circular(10),
             ),
           );
