@@ -91,7 +91,6 @@ class EqualizerPage extends StatelessWidget {
                                 controller.centerFreqs.assignAll(a ?? []);
                                 controller.bandLevels.assignAll(b ?? []);
                                 await controller.applyPreset(presetsName);
-                                print(controller.centerFreqs);
                               }
                             : null,
                         child: Container(
@@ -164,7 +163,6 @@ class EqualizerPage extends StatelessWidget {
                           onChanged: (value) {
                             songController.speedSongValue.value = value;
                             songController.audioPlayer.setSpeed(value);
-                            ;
                           },
                         ),
                       ),

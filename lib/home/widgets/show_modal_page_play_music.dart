@@ -5,9 +5,7 @@ import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/constants/colors.dart';
 import 'package:music_player/core/theme/app_theme_extension_timer.dart';
 import 'package:music_player/core/widgets/music_animation_widget/music_animation_widget.dart';
-import 'package:music_player/features/EqualizerPage/equalizer_page.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
-import 'package:music_player/home/widgets/modal_control_voice_song.dart';
 import 'package:music_player/routes/router.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:marquee/marquee.dart';
@@ -118,7 +116,7 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: QueryArtworkWidget(
-                              id: song.id!,
+                              id: song.id,
                               type: ArtworkType.AUDIO,
                               artworkFit: BoxFit.cover,
                               artworkBorder: BorderRadius.circular(10),
@@ -176,7 +174,7 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                               }),
                               Text(
                                 textAlign: TextAlign.center,
-                                song.title!,
+                                song.title,
                                 style: Theme.of(
                                   context,
                                 ).textTheme.titleMedium!.copyWith(fontSize: 20),
@@ -355,7 +353,7 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                   if (songController.isplay.value) {
                                     songController.pussMusic();
                                   } else {
-                                    await songController.playeMusic(song.data!);
+                                    await songController.playeMusic(song.data);
                                     songController.isplay.value = true;
                                   }
                                 },
