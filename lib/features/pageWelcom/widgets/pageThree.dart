@@ -57,7 +57,6 @@ class Pagethree extends StatelessWidget {
             ),
           ),
         ),
-        // SizedBox(height: 10),
         //TextFormField for name
         Transform.translate(
           offset: Offset(0, controller.transleatcolunmText.value),

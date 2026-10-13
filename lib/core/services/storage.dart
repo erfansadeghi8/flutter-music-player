@@ -33,4 +33,23 @@ class Storage {
   List readSaveRecentlySong() {
     return box.read("recentlySong") ?? [];
   }
+
+  Future<void> saveIsOnEqulauzer(bool isOn) async {
+    await box.write("EqualizerOn/Off", isOn);
+  }
+
+  bool readIsOnEqualizer() {
+    return box.read("EqualizerOn/Off") ?? false;
+  }
+
+  Future<void> saveEqualizerPreset(
+    String presetName,
+    List<int> bandLevels,
+  ) async {
+    await box.write("equalizerPreset_$presetName", bandLevels);
+  }
+
+  List<int>? readEqualizerPreset(String presetName) {
+    return box.read("equalizerPreset_$presetName")?.cast<int>();
+  }
 }

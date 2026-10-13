@@ -75,7 +75,10 @@ class ThemeCustomer {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Color(0xFF9717D3), width: 2),
+        borderSide: BorderSide(
+          color: Color.fromARGB(255, 2, 168, 190),
+          width: 2,
+        ),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
@@ -235,7 +238,10 @@ class ThemeCustomer {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Color(0xFF9717D3), width: 2),
+        borderSide: BorderSide(
+          color: Color.fromARGB(255, 2, 168, 190),
+          width: 2,
+        ),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),

@@ -37,7 +37,7 @@ class SongController extends GetxController {
 
   int get randomnInt => randoIndex.nextInt(songs.length);
 
-  RxDouble valueVolum = 0.5.obs;
+  RxDouble valueVolum = 50.0.obs;
   RxDouble speedSongValue = 1.0.obs;
 
   RxList savepositsionlist = [].obs;
