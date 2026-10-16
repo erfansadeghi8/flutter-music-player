@@ -167,6 +167,7 @@ class ThemeCustomer {
         const Color.fromARGB(255, 39, 193, 240),
       ),
     ),
+    disabledColor: Colors.white,
   );
 
   final themedartMode = ThemeData(
@@ -329,5 +330,6 @@ class ThemeCustomer {
         const Color.fromARGB(255, 99, 219, 255),
       ),
     ),
+    disabledColor: Colors.black,
   );
 }

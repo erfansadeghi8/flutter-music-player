@@ -56,7 +56,7 @@ class ShowModalTimer extends StatelessWidget {
               ).textTheme.labelSmall?.copyWith(fontSize: 25),
             ),
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(10),
               child: Container(
                 width: double.infinity,
                 height: 320,
@@ -70,7 +70,7 @@ class ShowModalTimer extends StatelessWidget {
                     children: [
                       // کپسول پشت مقدار انتخاب شده
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(10),
                         child: Container(
                           width: double.infinity,
                           height: 65,

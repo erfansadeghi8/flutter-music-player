@@ -30,11 +30,12 @@ class MainScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: Theme.of(
-              context,
-            ).extension<AppThemeExtension>()!.backgroundGradient,
-          ),
+          // gradient: LinearGradient(
+          //   colors: Theme.of(
+          //     context,
+          //   ).extension<AppThemeExtension>()!.backgroundGradient,
+          // ),
+          color: Theme.of(context).disabledColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(10.0),

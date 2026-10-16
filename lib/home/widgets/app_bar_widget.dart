@@ -16,11 +16,12 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 90,
       flexibleSpace: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: Theme.of(
-              context,
-            ).extension<AppThemeExtension>()!.backgroundGradient,
-          ),
+          // gradient: LinearGradient(
+          //   colors: Theme.of(
+          //     context,
+          //   ).extension<AppThemeExtension>()!.backgroundGradient,
+          // ),
+          color: Theme.of(context).disabledColor,
         ),
       ),
       automaticallyImplyLeading: false,

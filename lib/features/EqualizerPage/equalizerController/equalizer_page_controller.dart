@@ -9,7 +9,7 @@ class EqualizerController extends GetxController {
   final SongController songController = Get.find<SongController>();
   final storage = Storage();
   var isEqEnabled = false.obs;
-  var isReady = false.obs;
+  // var isReady = false.obs;
   var bandLevels = <int>[].obs;
   var centerFreqs = <int>[].obs;
   var presetNames = <String>[].obs;
@@ -98,7 +98,7 @@ class EqualizerController extends GetxController {
       } catch (e) {
         print('Preset error: $e');
       }
-      isReady.value = true;
+      // isReady.value = true;
     } catch (e, stackTrace) {
       print('ERROR: $e');
       print(stackTrace);

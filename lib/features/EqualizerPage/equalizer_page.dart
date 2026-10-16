@@ -12,7 +12,7 @@ class EqualizerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final presets = controller.equalizerPresets.keys.toList();
     return Scaffold(
-      appBar: AppBar(title: const Text('اکولایزر')),
+      appBar: AppBar(title: const Text('Equalizer')),
       body: Obx(() {
         if (controller.centerFreqs.isEmpty) {
           return const Center(child: CircularProgressIndicator());
@@ -20,7 +20,7 @@ class EqualizerPage extends StatelessWidget {
         return Column(
           children: [
             SwitchListTile(
-              title: const Text('فعال‌سازی اکولایزر'),
+              title: const Text('Enable Equalizer'),
               value: controller.isEqEnabled.value,
               onChanged: (value) async {
                 await controller.storage.saveIsOnEqulauzer(value);

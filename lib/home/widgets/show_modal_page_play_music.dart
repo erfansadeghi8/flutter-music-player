@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/constants/colors.dart';
-import 'package:music_player/core/theme/app_theme_extension_timer.dart';
 import 'package:music_player/core/widgets/music_animation_widget/music_animation_widget.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/routes/router.dart';
@@ -27,11 +26,12 @@ class ShowModalPagePlayMusic extends StatelessWidget {
         child: Container(
           height: double.infinity,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: Theme.of(
-                context,
-              ).extension<AppThemeExtensionTimer>()!.backgroundGradient,
-            ),
+            // gradient: LinearGradient(
+            //   colors: Theme.of(
+            //     context,
+            //   ).extension<AppThemeExtensionTimer>()!.backgroundGradient,
+            // ),
+            color: Colors.black,
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 50, 10, 0),

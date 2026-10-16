@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:music_player/core/services/notifcation_service.dart';
+import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 
 class WidgetTimer extends GetxController {
   Timer? _timer;
+  final SongController songController = Get.find<SongController>();
 
   final isTimerRunning = false.obs;
   int hourValue = 0;
@@ -51,6 +53,8 @@ class WidgetTimer extends GetxController {
           timer.cancel();
           // Timer تمام شده
           isTimerRunning.value = false;
+          reset();
+          songController.audioPlayer.stop();
         }
       });
     }
@@ -60,6 +64,8 @@ class WidgetTimer extends GetxController {
   void stop() async {
     if (isTimerRunning.value) {
       _timer?.cancel();
+      reset();
+      songController.audioPlayer.stop();
     }
     isTimerRunning.value = false;
     await NotificationService.cancelSleepTimer();
