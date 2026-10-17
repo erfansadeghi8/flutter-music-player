@@ -16,19 +16,23 @@ class ListRecentlyPayed extends StatelessWidget {
       if (songController.songRecently.isNotEmpty) {
         return SizedBox(
           height: AppSize.height(context) / 5,
-          child: InkWell(
-            child: ListView.builder(
-              itemCount: reversedSongs.length,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                final listmusicrecently = reversedSongs[index];
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
+          child: ListView.builder(
+            itemCount: reversedSongs.length,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              final listmusicrecently = reversedSongs[index];
+              return Padding(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () async {
+                        songController.addRecentlySong(listmusicrecently.id);
+                        await songController.playeMusic(listmusicrecently.data);
+                      },
+                      child: Container(
                         width: 110,
                         height: 110,
                         clipBehavior: Clip.antiAlias,
@@ -46,27 +50,27 @@ class ListRecentlyPayed extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(height: 5),
-                      SizedBox(
-                        width: 110,
-                        child: Text(
-                          listmusicrecently.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      Text(
-                        listmusicrecently.artist ?? "Unknown Artist",
-                        maxLines: 1,
-                        style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    SizedBox(height: 5),
+                    SizedBox(
+                      width: 110,
+                      child: Text(
+                        listmusicrecently.title,
+                        style: Theme.of(context).textTheme.titleMedium,
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                    Text(
+                      listmusicrecently.artist ?? "Unknown Artist",
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.labelSmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       }

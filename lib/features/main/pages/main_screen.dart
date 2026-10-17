@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/services/storage.dart';
-import 'package:music_player/core/theme/app_theme_extension.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/features/main/widgets/bottomnavbar.dart';

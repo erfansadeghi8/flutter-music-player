@@ -1,8 +1,6 @@
 // ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:music_player/core/services/storage.dart';
-import 'package:music_player/core/theme/app_theme_extension.dart';
 import 'package:music_player/data/models/date_time_day.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
