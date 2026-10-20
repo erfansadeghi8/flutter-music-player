@@ -90,7 +90,7 @@ class ShowModalTimer extends StatelessWidget {
                           NumberPicker(
                             minValue: 0,
                             maxValue: 23,
-                            value: controller.hour.value,
+                            value: controllerWidgetTimer.hour.value,
                             itemHeight: 80,
                             textStyle: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
@@ -109,10 +109,12 @@ class ShowModalTimer extends StatelessWidget {
                                 ),
 
                             onChanged: (value) {
-                              controller.hour.value = value;
+                              controllerWidgetTimer.isTimerRunning.value
+                                  ? null
+                                  : controllerWidgetTimer.hour.value = value;
                               controllerWidgetTimer.timerPusseMusic(
-                                controller.hour.value,
-                                controller.minute.value,
+                                controllerWidgetTimer.hour.value,
+                                controllerWidgetTimer.minutes.value,
                               );
                             },
                           ),
@@ -132,10 +134,8 @@ class ShowModalTimer extends StatelessWidget {
                           NumberPicker(
                             minValue: 0,
                             maxValue: 59,
-                            value: controller.minute.value,
-
+                            value: controllerWidgetTimer.minutes.value,
                             itemHeight: 80,
-
                             textStyle: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: Color.fromARGB(100, 255, 255, 255),
@@ -153,10 +153,12 @@ class ShowModalTimer extends StatelessWidget {
                                 ),
 
                             onChanged: (value) {
-                              controller.minute.value = value;
+                              controllerWidgetTimer.isTimerRunning.value
+                                  ? null
+                                  : controllerWidgetTimer.minutes.value = value;
                               controllerWidgetTimer.timerPusseMusic(
-                                controller.hour.value,
-                                controller.minute.value,
+                                controllerWidgetTimer.hour.value,
+                                controllerWidgetTimer.minutes.value,
                               );
                             },
                           ),
@@ -189,19 +191,21 @@ class ShowModalTimer extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: const Color.fromARGB(255, 128, 127, 127),
-                        width: 4,
+                        width: 5,
                       ),
-                      borderRadius: BorderRadius.circular(50),
+                      borderRadius: BorderRadius.circular(60),
                     ),
                     child: CircularProgressIndicator(
                       value: controllerWidgetTimer.progress.value,
-                      strokeWidth: 8,
+                      strokeWidth: 5,
+                      strokeAlign: 1,
+                      color: const Color.fromARGB(255, 0, 149, 194),
                     ),
                   ),
                   Center(
                     child: Text(
                       textAlign: TextAlign.center,
-                      '${controllerWidgetTimer.hour.value} : ${controllerWidgetTimer.minutes.value} : ${controllerWidgetTimer.seconds.value}',
+                      '${controllerWidgetTimer.hourString.value} : ${controllerWidgetTimer.minutesString.value} : ${controllerWidgetTimer.secondsString.value}',
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
@@ -217,29 +221,57 @@ class ShowModalTimer extends StatelessWidget {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 80,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: controllerWidgetTimer.isTimerRunning.value
-                        ? () {
-                            controllerWidgetTimer.stop();
-                          }
-                        : () {
-                            controllerWidgetTimer.start();
-                          },
-                    child: controllerWidgetTimer.isTimerRunning.value
-                        ? Icon(Icons.stop, size: 20)
-                        : Icon(Icons.play_arrow, size: 20),
-                  ),
+                  // ignore: unrelated_type_equality_checks
+                  !controllerWidgetTimer.isRun.value
+                      ? ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 80,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: controllerWidgetTimer.total.value == 0
+                              ? null
+                              : controllerWidgetTimer.isTimerRunning.value
+                              ? () {
+                                  controllerWidgetTimer.stop();
+                                }
+                              : () {
+                                  controllerWidgetTimer.start();
+                                },
+                          child: controllerWidgetTimer.isTimerRunning.value
+                              ? Icon(Icons.stop, size: 20)
+                              : Icon(Icons.play_arrow, size: 20),
+                        )
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 80,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: controllerWidgetTimer.total.value == 0
+                              ? null
+                              : controllerWidgetTimer.isTimerRunning.value
+                              ? () {
+                                  controllerWidgetTimer.stop();
+                                }
+                              : () {
+                                  controllerWidgetTimer.start();
+                                },
+                          child: controllerWidgetTimer.isTimerRunning.value
+                              ? Icon(Icons.stop, size: 20)
+                              : Icon(Icons.play_arrow, size: 20),
+                        ),
                   SizedBox(width: 10),
-                  controllerWidgetTimer.total > 0
+                  controllerWidgetTimer.total > 0 &&
+                          controllerWidgetTimer.isRun.value
                       ? ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(

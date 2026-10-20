@@ -237,7 +237,7 @@ class DrawerWidget extends StatelessWidget {
                       Row(
                         children: [
                           SizedBox(width: 10),
-                          controller.isActiveTimer.value
+                          controllerWidgetTimer.isActiveTimer.value
                               ? Icon(Icons.timer_outlined, size: 25)
                               : Icon(Icons.timer_off_outlined, size: 25),
                           SizedBox(width: 10),
@@ -248,12 +248,12 @@ class DrawerWidget extends StatelessWidget {
                         ],
                       ),
                       Switch(
-                        value: controller.isActiveTimer.value,
+                        value: controllerWidgetTimer.isActiveTimer.value,
                         onChanged: (value) {
-                          if (!controller.isActiveTimer.value) {
+                          if (!controllerWidgetTimer.isActiveTimer.value) {
                             controllerWidgetTimer.stop();
                           }
-                          controller.isActiveTimer.value = value;
+                          controllerWidgetTimer.isActiveTimer.value = value;
                         },
                       ),
                     ],
@@ -269,7 +269,7 @@ class DrawerWidget extends StatelessWidget {
                   height: 60,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: controller.isActiveTimer.value
+                    color: controllerWidgetTimer.isActiveTimer.value
                         ? const Color.fromARGB(73, 175, 175, 175)
                         : const Color.fromARGB(34, 211, 209, 209),
                   ),
@@ -299,7 +299,7 @@ class DrawerWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      controller.isActiveTimer.value
+                      controllerWidgetTimer.isActiveTimer.value
                           ? Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: IconButton(

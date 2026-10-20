@@ -21,7 +21,7 @@ class Pagethree extends StatelessWidget {
             child: Image.asset(
               "assets/imageWelcome/pageThreeImage.png",
               width: double.infinity,
-              height: 300,
+              height: 180,
             ),
           ),
         ),

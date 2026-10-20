@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/core/services/storage.dart';
@@ -41,6 +42,10 @@ class SongController extends GetxController {
   RxDouble speedSongValue = 1.0.obs;
 
   RxList savepositsionlist = [].obs;
+  bool _isChangingSong = false;
+
+  final Map<int, Uint8List?> _artCache = {};
+  final Rxn<Uint8List?> currentArt = Rxn<Uint8List?>();
 
   // ------------------------------------------------------------
   // LOAD SONGS
@@ -146,20 +151,16 @@ class SongController extends GetxController {
   // ------------------------------------------------------------
 
   Future<void> playeMusic(String urlmusic) async {
+    if (urlmusic.isEmpty) return;
     await audioPlayer.setFilePath(urlmusic);
-
     final lastPostionSong = storage.box.read("savePostionSing");
-
     final lastIdSongPstion = storage.box.read("last_id_song");
-
     if (lastIdSongPstion == currentSong.value?.id &&
         lastPostionSong != null &&
         lastPostionSong > 0) {
       await audioPlayer.seek(Duration(milliseconds: lastPostionSong));
     }
-
     await audioPlayer.play();
-
     isplay.value = true;
   }
   // ------------------------------------------------------------
@@ -177,38 +178,43 @@ class SongController extends GetxController {
 
   Future<void> nextSong() async {
     if (songs.isEmpty) return;
+    if (_isChangingSong) return; // کلیک‌های سریع نادیده گرفته می‌شن
+    _isChangingSong = true;
 
-    final latestSong = songRecentlyStorage.reduce(
-      (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
-    );
+    try {
+      final latestSong = songRecentlyStorage.reduce(
+        (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
+      );
 
-    final currentIndex = songs.indexWhere(
-      (song) => song.id == latestSong.songId,
-    );
+      final currentIndex = songs.indexWhere(
+        (song) => song.id == latestSong.songId,
+      );
 
-    await storage.box.write("savePostionSing", 0);
+      if (isrendom.value) {
+        nextIndex.value = randomnInt;
+      } else {
+        nextIndex.value = currentIndex + 1;
+      }
 
-    await storage.box.write("last_id_song", currentSong.value?.id);
+      if (nextIndex.value >= songs.length) {
+        nextIndex.value = 0;
+      }
 
-    if (isrendom.value) {
-      nextIndex.value = randomnInt;
-    } else {
-      nextIndex.value = currentIndex + 1;
+      nextAndBackSongMusic.value = songs[nextIndex.value];
+      currentSong.value = nextAndBackSongMusic.value;
+      addRecentlySong(nextAndBackSongMusic.value!.id);
+
+      await storage.box.write("savePostionSing", 0);
+      await storage.box.write("last_id_song", currentSong.value?.id);
+
+      if (isplay.value) {
+        await playeMusic(nextAndBackSongMusic.value!.data);
+      } else {
+        await audioPlayer.stop();
+      }
+    } finally {
+      _isChangingSong = false; // حتی در صورت خطا قفل آزاد می‌شه
     }
-
-    if (nextIndex.value >= songs.length) {
-      nextIndex.value = 0;
-    }
-
-    nextAndBackSongMusic.value = songs[nextIndex.value];
-
-    currentSong.value = nextAndBackSongMusic.value;
-
-    addRecentlySong(nextAndBackSongMusic.value!.id);
-
-    await audioPlayer.stop();
-
-    await playeMusic(nextAndBackSongMusic.value!.data);
   }
 
   // ------------------------------------------------------------
@@ -217,43 +223,42 @@ class SongController extends GetxController {
 
   Future<void> backSong() async {
     if (songs.isEmpty) return;
+    if (_isChangingSong) return;
+    _isChangingSong = true;
+    try {
+      final latestSong = songRecentlyStorage.reduce(
+        (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
+      );
+      final currentIndex = songs.indexWhere(
+        (song) => song.id == latestSong.songId,
+      );
+      backIndex.value = currentIndex - 1;
+      await storage.box.write("savePostionSing", 0);
+      await storage.box.write("last_id_song", currentSong.value?.id);
+      if (backIndex.value >= 0) {
+        nextAndBackSongMusic.value = songs[backIndex.value];
 
-    final latestSong = songRecentlyStorage.reduce(
-      (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
-    );
+        currentSong.value = nextAndBackSongMusic.value;
 
-    final currentIndex = songs.indexWhere(
-      (song) => song.id == latestSong.songId,
-    );
-
-    backIndex.value = currentIndex - 1;
-
-    await storage.box.write("savePostionSing", 0);
-
-    await storage.box.write("last_id_song", currentSong.value?.id);
-
-    if (backIndex.value >= 0) {
-      nextAndBackSongMusic.value = songs[backIndex.value];
-
-      currentSong.value = nextAndBackSongMusic.value;
-
-      addRecentlySong(nextAndBackSongMusic.value!.id);
-
-      await audioPlayer.stop();
-
-      await playeMusic(nextAndBackSongMusic.value!.data);
-    } else {
-      backIndex.value = songs.length - 1;
-
-      nextAndBackSongMusic.value = songs[backIndex.value];
-
-      currentSong.value = nextAndBackSongMusic.value;
-
-      addRecentlySong(nextAndBackSongMusic.value!.id);
-
-      await audioPlayer.stop();
-
-      await playeMusic(nextAndBackSongMusic.value!.data);
+        addRecentlySong(nextAndBackSongMusic.value!.id);
+        if (isplay.value) {
+          await playeMusic(nextAndBackSongMusic.value!.data);
+        } else {
+          await audioPlayer.stop();
+        }
+      } else {
+        backIndex.value = songs.length - 1;
+        nextAndBackSongMusic.value = songs[backIndex.value];
+        currentSong.value = nextAndBackSongMusic.value;
+        addRecentlySong(nextAndBackSongMusic.value!.id);
+        if (isplay.value) {
+          await playeMusic(nextAndBackSongMusic.value!.data);
+        } else {
+          await audioPlayer.stop();
+        }
+      }
+    } finally {
+      _isChangingSong = false;
     }
   }
 
@@ -354,13 +359,46 @@ class SongController extends GetxController {
     }
   }
 
+  Future<Uint8List?> _loadArtwork(SongModel song) async {
+    if (_artCache.containsKey(song.id)) return _artCache[song.id];
+    final bytes = await OnAudioQuery().queryArtwork(
+      song.id,
+      ArtworkType.AUDIO,
+      size: 1000,
+      quality: 100,
+    );
+    _artCache[song.id] = bytes;
+    return bytes;
+  }
+
+  @override
   @override
   void onInit() {
     super.onInit();
-
     loadRecentlyData();
-
     initplayer();
+
+    ever(currentSong, (song) async {
+      if (song == null) return;
+
+      final bytes = await _loadArtwork(song);
+
+      // اگه تو این فاصله آهنگ عوض شده، نتیجه‌ی قدیمی رو نادیده بگیر
+      if (currentSong.value?.id == song.id) {
+        currentArt.value = bytes;
+      }
+
+      _preloadNeighbors();
+    });
+  }
+
+  // بیرون از onInit، به عنوان متد کلاس
+  void _preloadNeighbors() {
+    final i = songs.indexWhere((s) => s.id == currentSong.value?.id);
+    if (i == -1) return;
+    for (final j in [i - 1, i + 1]) {
+      if (j >= 0 && j < songs.length) _loadArtwork(songs[j]);
+    }
   }
 
   // ------------------------------------------------------------

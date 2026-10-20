@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,7 +8,6 @@ import 'package:music_player/core/widgets/music_animation_widget/music_animation
 import 'package:music_player/features/EqualizerPage/equalizer_page.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
-import 'package:on_audio_query/on_audio_query.dart';
 import 'package:marquee/marquee.dart';
 
 class ShowModalPagePlayMusic extends StatelessWidget {
@@ -26,32 +24,41 @@ class ShowModalPagePlayMusic extends StatelessWidget {
       final song = songController.songs.firstWhere(
         (song) => song.id == latestSong.songId,
       );
-      homeController.selectedColorImage(song.id);
       return Material(
         child: Stack(
           fit: StackFit.expand,
           children: [
             // 1) تصویر پس‌زمینه
-            Positioned.fill(
-              child: homeController.a.value.isNotEmpty
-                  ? Image.memory(
-                      homeController.a.value,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Image.asset(
-                        'assets/RecentlyMusic/null_is_poster2.jpg',
+            Obx(() {
+              final art = songController.currentArt.value;
+              return art != null
+                  ? Positioned.fill(
+                      child: Image.memory(
+                        art,
+                        gaplessPlayback:
+                            true, // تا عکس جدید نیومده، قبلی می‌مونه
                         fit: BoxFit.cover,
                       ),
                     )
-                  : Image.asset(
-                      'assets/RecentlyMusic/null_is_poster2.jpg',
-                      fit: BoxFit.cover,
-                    ),
-            ),
+                  : Container(
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            const ui.Color.fromARGB(255, 22, 22, 22),
+                            Colors.black,
+                          ],
+                        ),
+                      ),
+                    );
+            }),
 
             // 2) بلور ملایم
             Positioned.fill(
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(color: Colors.black.withValues(alpha: 0.35)),
               ),
             ),
@@ -162,7 +169,7 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                     },
                               );
                             },
-                            icon: Icon(Icons.more_vert, size: 40),
+                            icon: Icon(Icons.equalizer, size: 40),
                           ),
                         ],
                       ),
@@ -172,28 +179,32 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Obx(
-                              () => AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOutCubic,
-                                width: songController.isplay.value
-                                    ? AppSize.wdith(context) / 1.2
-                                    : AppSize.wdith(context) / 2.2,
-                                height: songController.isplay.value
-                                    ? AppSize.height(context) / 2.8
-                                    : AppSize.height(context) / 4.8,
-                                child: QueryArtworkWidget(
-                                  id: song.id,
-                                  type: ArtworkType.AUDIO,
-                                  artworkFit: BoxFit.cover,
-                                  artworkBorder: BorderRadius.circular(10),
-                                  nullArtworkWidget: Image.asset(
-                                    "assets/RecentlyMusic/null_is_poster2.jpg",
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            Obx(() {
+                              final art = songController.currentArt.value;
+                              return art != null
+                                  ? AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeInOutCubic,
+                                      width: songController.isplay.value
+                                          ? AppSize.wdith(context) / 1.2
+                                          : AppSize.wdith(context) / 2.2,
+                                      height: songController.isplay.value
+                                          ? AppSize.height(context) / 2.8
+                                          : AppSize.height(context) / 4.8,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.memory(
+                                          art,
+                                          gaplessPlayback:
+                                              true, // تا عکس جدید نیومده، قبلی می‌مونه
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    )
+                                  : const Icon(Icons.music_note, size: 80);
+                            }),
                           ],
                         ),
                       ),
@@ -424,6 +435,7 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                       onPressed: () async {
                                         songController.backSong();
                                       },
+
                                       icon: Icon(Icons.skip_previous, size: 35),
                                     ),
                                     //button play or pusse

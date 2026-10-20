@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-import 'package:palette_generator/palette_generator.dart';
 
 class HomeController extends GetxController {
   final storage = GetStorage();
@@ -27,19 +26,19 @@ class HomeController extends GetxController {
     );
     if (artwork != null) {
       a.value = artwork;
-      final palate = await PaletteGenerator.fromImageProvider(
-        MemoryImage(a.value),
-        maximumColorCount: 16,
-      );
+      //   final palate = await PaletteGenerator.fromImageProvider(
+      //     MemoryImage(a.value),
+      //     maximumColorCount: 16,
+      //   );
 
-      dmoninantColor.value =
-          palate.dominantColor?.color ?? const Color(0xFF202030);
+      //   dmoninantColor.value =
+      //       palate.dominantColor?.color ?? const Color(0xFF202030);
 
-      secondaryColor.value =
-          palate.darkMutedColor?.color ?? const Color(0xFF101018);
-    } else {
-      dmoninantColor.value = const Color(0xFF202030);
-      secondaryColor.value = const Color(0xFF101018);
+      //   secondaryColor.value =
+      //       palate.darkMutedColor?.color ?? const Color(0xFF101018);
+      // } else {
+      //   dmoninantColor.value = const Color(0xFF202030);
+      //   secondaryColor.value = const Color(0xFF101018);
     }
   }
 }

@@ -9,13 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MainController extends GetxController {
   RxInt selectedIndexListSong = 0.obs;
-  RxBool isplay = false.obs;
   RxInt selectedNavbar = 0.obs;
   Rx<ThemeMode> selectedmodeTheme = ThemeMode.system.obs;
   final box = GetStorage();
-  RxInt hour = 0.obs;
-  RxInt minute = 0.obs;
-  RxBool isActiveTimer = false.obs;
 
   List<Widget> listnavbar = [
     HomePage(),
