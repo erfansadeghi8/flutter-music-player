@@ -15,12 +15,16 @@ class ShowPlayingMusic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if (songController.songRecentlyStorage.isEmpty) {
+        return const SizedBox.shrink();
+      }
       final latestSong = songController.songRecentlyStorage.reduce(
         (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
       );
-      final song = songController.songs.firstWhere(
+      final song = songController.songs.where(
         (song) => song.id == latestSong.songId,
-      );
+      ).firstOrNull;
+      if (song == null) return const SizedBox.shrink();
       return Padding(
         padding: const EdgeInsets.only(bottom: 10, left: 8, right: 8),
         child: InkWell(

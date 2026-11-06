@@ -6,8 +6,7 @@ import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 
 class WidgetTimer extends GetxController {
   Timer? _timer;
-  final SongController songController = Get.find<SongController>();
-
+  final SongController songController = Get.put(SongController());
   final isTimerRunning = false.obs;
   int hourValue = 0;
   int minuteValue = 0;
@@ -52,10 +51,12 @@ class WidgetTimer extends GetxController {
         hourString.value = hour.value.toString().padLeft(2, '0');
         minutesString.value = minutes.value.toString().padLeft(2, '0');
         secondsString.value = seconds.value.toString().padLeft(2, '0');
-        NotificationService.ShowSleepTimer(
-          remainingTime:
-              '${hourString.value} : ${minutesString.value} : ${secondsString.value}',
-        );
+        if (isActiveTimer.value) {
+          NotificationService.ShowSleepTimer(
+            remainingTime:
+                '${hourString.value} : ${minutesString.value} : ${secondsString.value}',
+          );
+        }
         // ignore: avoid_print
         if (total <= 0) {
           timer.cancel();
@@ -65,6 +66,7 @@ class WidgetTimer extends GetxController {
           isActiveTimer.value = false;
           reset();
           songController.pussMusic();
+          NotificationService.cancelSleepTimer();
           SystemNavigator.pop();
         }
       });
@@ -77,15 +79,18 @@ class WidgetTimer extends GetxController {
     if (isTimerRunning.value) {
       _timer?.cancel();
       isTimerRunning.value = false;
+      NotificationService.ShowSleepTimer(
+        remainingTime:
+            '${hourString.value} : ${minutesString.value} : ${secondsString.value}',
+      );
     }
     if (selectedTotal == 0) {
       isRun.value = false;
     }
     isTimerRunning.value = false;
-    await NotificationService.cancelSleepTimer();
   }
 
-  void reset() {
+  void reset() async {
     progress.value = 0;
     hour.value = 0;
     minutes.value = 0;
@@ -94,6 +99,14 @@ class WidgetTimer extends GetxController {
     hourString.value = "00";
     minutesString.value = "00";
     secondsString.value = "00";
+    isActiveTimer.value = false;
+    await NotificationService.cancelSleepTimer();
+  }
+
+  void cancellTimer() async {
+    reset();
+    stop();
+    isActiveTimer.value = false;
   }
 
   @override

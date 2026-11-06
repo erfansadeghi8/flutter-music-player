@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
-
+import 'dart:isolate';
+import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/instance_manager.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
@@ -12,6 +13,8 @@ class NotificationService {
   static const String channelId = "sleep_timer_channel";
   static const String channelNmae = "sleep timer";
   static const String description = "Notifications for Lyra sleep timer";
+  static const String notifPortName = 'notif_action_port';
+
 
   static Future<void> initialize() async {
     const AndroidInitializationSettings androidInitializationSettings =
@@ -23,7 +26,13 @@ class NotificationService {
     await notificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: onNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: notificationBackgroundHandler,
     );
+
+    final receivePort = ReceivePort();
+    IsolateNameServer.removePortNameMapping(notifPortName);
+    IsolateNameServer.registerPortWithName(receivePort.sendPort, notifPortName);
+    receivePort.listen((actionId) => _handleAction(actionId as String?));
 
     //برای قسمت اجازه دادن اندروید و ایفون که نوتیف میاد برامون
     await notificationsPlugin
@@ -38,7 +47,7 @@ class NotificationService {
     required String remainingTime,
   }) async {
     //»شخص کردن تنظیمات نوتیف داخل اندروید
-    const androidDetalis = AndroidNotificationDetails(
+    final androidDetalis = AndroidNotificationDetails(
       channelId,
       channelNmae,
       channelDescription: description,
@@ -53,24 +62,34 @@ class NotificationService {
       //باعث میشه با هر بار تغییر زمان و اپدیت کردن گوشی صدا نده و روی ویوره نره
       onlyAlertOnce: true,
       // دکمه های نوتیف اینجا تعریف میشود
+      color: Color.fromARGB(255, 17, 17, 17),
       actions: [
-        AndroidNotificationAction(
-          "stop_timer",
-          "STOP",
-          // رای زمانی هست که وقتی روی action کلیک شد UI هم درگیر بشه و برنامه باز بشه
-          showsUserInterface: true,
-        ),
-        AndroidNotificationAction(
-          "run_timer",
-          "Run",
-          // رای زمانی هست که وقتی روی action کلیک شد UI هم درگیر بشه و برنامه باز بشه
-          showsUserInterface: true,
-        ),
+        if (Get.put(WidgetTimer()).isTimerRunning.value &&
+            Get.put(WidgetTimer()).isRun.value) ...[
+          AndroidNotificationAction(
+            "stop_timer",
+            "STOP",
+            showsUserInterface: false,
+            cancelNotification: false,
+          ),
+        ] else ...[
+          AndroidNotificationAction(
+            "Cancel_timer",
+            "Cancel",
+            showsUserInterface: false,
+            cancelNotification: false,
+          ),
+          AndroidNotificationAction(
+            "run_timer",
+            "Run",
+            showsUserInterface: false,
+            cancelNotification: false,
+          ),
+        ],
       ],
     );
     //اینجا تعزریف کردم برای اندورید میخوام
-    const notificationDetails = NotificationDetails(android: androidDetalis);
-
+    final notificationDetails = NotificationDetails(android: androidDetalis);
     await notificationsPlugin.show(
       id: notificaionId,
       title: "Lyra",
@@ -84,11 +103,36 @@ class NotificationService {
   }
 
   static void onNotificationResponse(NotificationResponse response) {
-    if (response.actionId == "stop_timer") {
-      Get.put(WidgetTimer()).stop();
-    }
-    if (response.actionId == "run_timer") {
-      Get.put(WidgetTimer()).start();
+    _handleAction(response.actionId);
+  }
+
+  static void _handleAction(String? actionId) async {
+    if (!Get.isRegistered<WidgetTimer>()) return;
+    final timer = Get.find<WidgetTimer>();
+
+    if (actionId == "stop_timer") {
+      timer.stop();
+      await ShowSleepTimer(
+        remainingTime:
+            '${timer.hourString.value} : ${timer.minutesString.value} : ${timer.secondsString.value}',
+      );
+    } else if (actionId == "run_timer") {
+      timer.start();
+      await ShowSleepTimer(
+        remainingTime:
+            '${timer.hourString.value} : ${timer.minutesString.value} : ${timer.secondsString.value}',
+      );
+    } else if (actionId == "Cancel_timer") {
+      timer.cancellTimer();
     }
   }
+
+}
+
+@pragma('vm:entry-point')
+void notificationBackgroundHandler(NotificationResponse response) {
+  final SendPort? port = IsolateNameServer.lookupPortByName(
+    NotificationService.notifPortName,
+  );
+  port?.send(response.actionId);
 }

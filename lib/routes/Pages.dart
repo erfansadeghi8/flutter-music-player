@@ -5,6 +5,7 @@ import 'package:music_player/features/EqualizerPage/equalizer_page.dart';
 import 'package:music_player/features/main/pages/main_screen.dart';
 import 'package:music_player/features/pageWelcom/pageWelcom.dart';
 import 'package:music_player/home/home_page.dart';
+import 'package:music_player/home/widgets/see_recently_page.dart';
 import 'package:music_player/routes/bilding.dart';
 import 'package:music_player/routes/router.dart';
 
@@ -41,6 +42,11 @@ class AppPages {
       name: AppRouter.equalizerPage,
       page: () => EqualizerPage(),
       binding: EqualizerBilding(),
+    ),
+    GetPage(
+      name: AppRouter.seeRecentlyPage,
+      page: () => SeeRecentlyPage(),
+      binding: PageSeeRecentlyBilding(),
     ),
   ];
 }

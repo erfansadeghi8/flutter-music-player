@@ -19,8 +19,10 @@ class FormFiedSearch extends StatelessWidget {
             hintText: "Search songs, artists,allbums...",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
           ),
+          onChanged: (value) => controller.onSearchChanged(value),
           style: Theme.of(context).textTheme.labelMedium,
         ),
+
       ),
     );
   }

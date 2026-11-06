@@ -12,15 +12,14 @@ class ListRecentlyPayed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final reversedSongs = songController.songRecently.reversed.toList();
       if (songController.songRecently.isNotEmpty) {
         return SizedBox(
           height: AppSize.height(context) / 5,
           child: ListView.builder(
-            itemCount: reversedSongs.length,
+            itemCount: songController.songRecently.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              final listmusicrecently = reversedSongs[index];
+              final listmusicrecently = songController.songRecently[index];
               return Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: Column(
@@ -29,6 +28,25 @@ class ListRecentlyPayed extends StatelessWidget {
                   children: [
                     InkWell(
                       onTap: () async {
+                        if (songController.isChangingSong) return;
+                        songController.isChangingSong = true;
+                        await songController.playeMusic(listmusicrecently.data);
+
+                        try {
+                          if (songController.isplay.value) {
+                            await songController.playeMusic(
+                              listmusicrecently.data,
+                            );
+                            await songController.resetCurrentPostion();
+                            songController.addRecentlySong(
+                              listmusicrecently.id,
+                            );
+                          } else {
+                            await songController.audioPlayer.stop();
+                          }
+                        } finally {
+                          songController.isChangingSong = false;
+                        }
                         songController.addRecentlySong(listmusicrecently.id);
                         await songController.playeMusic(listmusicrecently.data);
                       },

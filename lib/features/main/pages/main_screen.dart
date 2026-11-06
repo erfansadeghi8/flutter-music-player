@@ -13,6 +13,7 @@ class MainScreen extends StatelessWidget {
   final controller = Get.find<MainController>();
   final songController = Get.find<SongController>();
   final nameStorage = Storage();
+  
   @override
   Widget build(BuildContext context) {
     // ignore: avoid_print
@@ -29,11 +30,6 @@ class MainScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: BoxDecoration(
-          // gradient: LinearGradient(
-          //   colors: Theme.of(
-          //     context,
-          //   ).extension<AppThemeExtension>()!.backgroundGradient,
-          // ),
           color: Theme.of(context).disabledColor,
         ),
         child: Padding(

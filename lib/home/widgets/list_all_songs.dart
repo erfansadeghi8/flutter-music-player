@@ -31,10 +31,22 @@ class ListAllSongs extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () async {
-                      await songController.resetCurrentPostion();
-                      await songController.audioPlayer.stop();
-                      songController.addRecentlySong(listAllSongs.id);
+                      // songController.sortRecentlySongs();
+                      if (songController.isChangingSong) return;
+                      songController.isChangingSong = true;
                       await songController.playeMusic(listAllSongs.data);
+
+                      try {
+                        if (songController.isplay.value) {
+                          await songController.playeMusic(listAllSongs.data);
+                          await songController.resetCurrentPostion();
+                          songController.addRecentlySong(listAllSongs.id);
+                        } else {
+                          await songController.audioPlayer.stop();
+                        }
+                      } finally {
+                        songController.isChangingSong = false;
+                      }
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 10),

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/constants/colors.dart';
 import 'package:music_player/core/widgets/music_animation_widget/music_animation_widget.dart';
+import 'package:music_player/features/EqualizerPage/equalizerController/equalizer_page_controller.dart';
 import 'package:music_player/features/EqualizerPage/equalizer_page.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
@@ -14,16 +15,23 @@ class ShowModalPagePlayMusic extends StatelessWidget {
   ShowModalPagePlayMusic({super.key});
   final songController = Get.find<SongController>();
   final homeController = Get.find<HomeController>();
+  final EqualizerController controllerEqualizer =
+      Get.find<EqualizerController>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if (songController.songRecentlyStorage.isEmpty) {
+        return const SizedBox.shrink();
+      }
       final latestSong = songController.songRecentlyStorage.reduce(
         (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
       );
-      final song = songController.songs.firstWhere(
+      final song = songController.songs.where(
         (song) => song.id == latestSong.songId,
-      );
+      ).firstOrNull;
+      if (song == null) return const SizedBox.shrink();
+      songController.currentSong.value = song;
       return Material(
         child: Stack(
           fit: StackFit.expand,
@@ -169,7 +177,14 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                     },
                               );
                             },
-                            icon: Icon(Icons.equalizer, size: 40),
+
+                            icon: controllerEqualizer.isEqEnabled.value
+                                ? Icon(
+                                    Icons.equalizer,
+                                    size: 40,
+                                    color: const ui.Color.fromARGB(255, 0, 122, 106),
+                                  )
+                                : Icon(Icons.equalizer, size: 40),
                           ),
                         ],
                       ),
@@ -271,11 +286,8 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                       width: AppSize.wdith(context) / 4,
                                       child: Marquee(
                                         text:
-                                            songController
-                                                .currentSong
-                                                .value
-                                                ?.artist
-                                                .toString() ??
+                                            // ignore: invalid_null_aware_operator
+                                            song?.artist.toString() ??
                                             "Unknown Artist",
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,

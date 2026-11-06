@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/route_manager.dart';
@@ -14,6 +16,9 @@ class ShowModalTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(controllerWidgetTimer.isTimerRunning.value);
+    print(controllerWidgetTimer.isRun.value);
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(

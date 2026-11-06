@@ -3,6 +3,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:music_player/core/services/notifcation_service.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
@@ -249,9 +250,12 @@ class DrawerWidget extends StatelessWidget {
                       ),
                       Switch(
                         value: controllerWidgetTimer.isActiveTimer.value,
-                        onChanged: (value) {
+                        onChanged: (value) async {
                           if (!controllerWidgetTimer.isActiveTimer.value) {
-                            controllerWidgetTimer.stop();
+                            controllerWidgetTimer.cancellTimer();
+                          }
+                          if (controllerWidgetTimer.isActiveTimer.value) {
+                            await NotificationService.cancelSleepTimer();
                           }
                           controllerWidgetTimer.isActiveTimer.value = value;
                         },

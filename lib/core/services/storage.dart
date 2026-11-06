@@ -52,4 +52,13 @@ class Storage {
   List<int>? readEqualizerPreset(String presetName) {
     return box.read("equalizerPreset_$presetName")?.cast<int>();
   }
+
+   Future<void> saveSearchingSong(List<int> data) async {
+    await box.write("saveSearchingSong", data);
+  }
+
+  List<int> readSaveSearchingSong() {
+    return List<int>.from(box.read("saveSearchingSong") ?? []);
+  }
+  
 }
