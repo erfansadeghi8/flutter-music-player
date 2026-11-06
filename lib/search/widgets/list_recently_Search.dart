@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
@@ -32,7 +34,7 @@ class ListRecentlySearch extends StatelessWidget {
                   await songController.playeMusic(song.data);
 
                   if (songController.isplay.value) {
-                    await songController.resetCurrentPostion();;
+                    await songController.resetCurrentPostion();
 
                     await searchPageController.saveSearchingSongToStorage(
                       song.id,
