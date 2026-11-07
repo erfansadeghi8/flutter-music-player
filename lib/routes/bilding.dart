@@ -31,7 +31,7 @@ class WelcomePageBilding extends Bindings {
 class MainScreenBilding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => MainController());
+    Get.lazyPut(() => MainController(),);
     Get.lazyPut(() => SongController());
     Get.put(WidgetTimer(), permanent: true);
   }

@@ -5,10 +5,12 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/core/services/lyra_audio_handler.dart';
 import 'package:music_player/core/services/storage.dart';
+import 'package:music_player/data/models/folder_mode.dart';
 import 'package:music_player/data/models/model_favorite_songs.dart';
 import 'package:music_player/data/models/model_recently_song.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -54,6 +56,8 @@ class SongController extends GetxController {
   final Map<int, Uint8List?> _artCache = {};
   final Rxn<Uint8List?> currentArt = Rxn<Uint8List?>();
 
+  final RxList<FolderMode> foders = <FolderMode>[].obs;
+
   // ------------------------------------------------------------
   // LOAD SONGS
   // ------------------------------------------------------------
@@ -65,11 +69,40 @@ class SongController extends GetxController {
     }
     final result = await audioQuery.querySongs();
     songs.assignAll(result);
+    getFolder();
   }
 
   // ------------------------------------------------------------
   // RECENTLY SONG
   // ------------------------------------------------------------
+
+  void getFolder() {
+    final Map<String, List<SongModel>> foldermap = {};
+
+    for (final song in songs) {
+      final path = song.data.replaceAll("\\", "/");
+      final lastSlash = path.lastIndexOf("/");
+      if (lastSlash == -1) continue;
+      final folderPath = path.substring(0, lastSlash);
+      final folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
+
+      foldermap.putIfAbsent(folderPath, () => []);
+
+      foldermap[folderPath]!.add(song);
+
+      foders.assignAll(
+        foldermap.entries.map((entry) {
+          final path = entry.key;
+
+          return FolderMode(
+            name: path.substring(path.lastIndexOf("/") + 1),
+            path: path,
+            songs: entry.value,
+          );
+        }).toList(),
+      );
+    }
+  }
 
   void saveRecentlyGetstorage() {
     final date = songRecentlyStorage.map((song) {

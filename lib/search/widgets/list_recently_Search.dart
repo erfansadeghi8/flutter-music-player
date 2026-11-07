@@ -1,19 +1,19 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/search/searchController/search_controller.dart';
 
 class ListRecentlySearch extends StatelessWidget {
+  ListRecentlySearch({super.key});
+
   final SearchPageController searchPageController =
       Get.find<SearchPageController>();
 
-  final songController = Get.find<SongController>();
-  final mainController = Get.find<MainController>();
+  final SongController songController = Get.find<SongController>();
 
-  ListRecentlySearch({super.key});
+  final MainController mainController = Get.find<MainController>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +30,8 @@ class ListRecentlySearch extends StatelessWidget {
 
                 songController.isChangingSong = true;
 
+                bool success = false;
+
                 try {
                   await songController.playeMusic(song.data);
 
@@ -39,28 +41,32 @@ class ListRecentlySearch extends StatelessWidget {
                     await searchPageController.saveSearchingSongToStorage(
                       song.id,
                     );
-                  }
 
-                  mainController.selectedNavbar.value = 0;
+                    success = true;
+                  }
                 } finally {
                   songController.isChangingSong = false;
+                }
+
+                if (success) {
+                  mainController.selectedNavbar.value = 0;
                 }
               },
               child: Container(
                 width: double.infinity,
                 height: 50,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
                       width: 2,
-                      color: const Color.fromARGB(255, 95, 95, 95),
+                      color: Color.fromARGB(255, 95, 95, 95),
                     ),
                   ),
                 ),
                 padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
                 child: Row(
                   children: [
-                    const Icon(Icons.search_rounded),
+                    const Icon(Icons.search_rounded ,size: 15,),
                     const SizedBox(width: 20),
 
                     Expanded(
@@ -70,7 +76,7 @@ class ListRecentlySearch extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
-                              fontSize: 16,
+                              fontSize: 12,
                               fontWeight: FontWeight.w400,
                             ),
                       ),
@@ -82,9 +88,10 @@ class ListRecentlySearch extends StatelessWidget {
                           Colors.transparent,
                         ),
                       ),
-                      onPressed: () async => await searchPageController
-                          .deleteRecentlySong(song.id),
-                      icon: const Icon(Icons.close),
+                      onPressed: () async {
+                        await searchPageController.deleteRecentlySong(song.id);
+                      },
+                      icon: const Icon(Icons.close ,size: 16,),
                     ),
                   ],
                 ),
