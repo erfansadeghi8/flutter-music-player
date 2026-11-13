@@ -24,14 +24,8 @@ class ShowModalPagePlayMusic extends StatelessWidget {
       if (songController.songRecentlyStorage.isEmpty) {
         return const SizedBox.shrink();
       }
-      final latestSong = songController.songRecentlyStorage.reduce(
-        (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
-      );
-      final song = songController.songs.where(
-        (song) => song.id == latestSong.songId,
-      ).firstOrNull;
+      final song = songController.currentSong.value;
       if (song == null) return const SizedBox.shrink();
-      songController.currentSong.value = song;
       return Material(
         child: Stack(
           fit: StackFit.expand,
@@ -182,7 +176,12 @@ class ShowModalPagePlayMusic extends StatelessWidget {
                                 ? Icon(
                                     Icons.equalizer,
                                     size: 40,
-                                    color: const ui.Color.fromARGB(255, 0, 122, 106),
+                                    color: const ui.Color.fromARGB(
+                                      255,
+                                      0,
+                                      122,
+                                      106,
+                                    ),
                                   )
                                 : Icon(Icons.equalizer, size: 40),
                           ),

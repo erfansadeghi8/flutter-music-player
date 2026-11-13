@@ -29,6 +29,8 @@ class ListRecentlySearch extends StatelessWidget {
                 if (songController.isChangingSong) return;
 
                 songController.isChangingSong = true;
+                // Clear playlist to use global songs list
+                songController.clearCurrentPlaylist();
 
                 bool success = false;
 

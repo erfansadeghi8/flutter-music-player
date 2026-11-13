@@ -3,14 +3,14 @@ class ModelFavoriteSongs {
   bool isFavorite;
 
   ModelFavoriteSongs({required this.isFavorite, required this.songId});
-  factory ModelFavoriteSongs.formJson(Map<dynamic, dynamic> json) {
+  factory ModelFavoriteSongs.fromJson(Map<dynamic, dynamic> json) {
     return ModelFavoriteSongs(
       isFavorite: json["isFavorite"],
       songId: json["songId"],
     );
   }
 
-  Map<String, dynamic> tostring() {
+  Map<String, dynamic> toJson() {
     return {"songId": songId, "isFavorite": isFavorite};
   }
 }

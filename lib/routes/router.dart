@@ -5,4 +5,5 @@ abstract class AppRouter {
   static const homescreen = "/homescreen";
   static const equalizerPage = "/equalizerPage";
   static const seeRecentlyPage = "/seeRecentlyPage";
+  static const libraryListPage = "/librarylistpage";
 }

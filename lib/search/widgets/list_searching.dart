@@ -43,6 +43,8 @@ class ListSearching extends StatelessWidget {
                     if (songController.isChangingSong) return;
 
                     songController.isChangingSong = true;
+                    // Clear playlist to use global songs list
+                    songController.clearCurrentPlaylist();
 
                     try {
                       await songController.playeMusic(song.data);

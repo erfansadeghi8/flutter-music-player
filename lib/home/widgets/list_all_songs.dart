@@ -18,7 +18,7 @@ class ListAllSongs extends StatelessWidget {
         return SizedBox(
           height: songController.songRecently.isNotEmpty
               ? AppSize.size(context).height / 2.75
-              : AppSize.size(context).height / 1.55,
+              : AppSize.size(context).height / 1.55,  
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: ListView.builder(
@@ -31,14 +31,14 @@ class ListAllSongs extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () async {
-                      // songController.sortRecentlySongs();
                       if (songController.isChangingSong) return;
                       songController.isChangingSong = true;
+                      // Clear playlist to use global songs list
+                      songController.clearCurrentPlaylist();
                       await songController.playeMusic(listAllSongs.data);
 
                       try {
                         if (songController.isplay.value) {
-                          await songController.playeMusic(listAllSongs.data);
                           await songController.resetCurrentPostion();
                           songController.addRecentlySong(listAllSongs.id);
                         } else {
@@ -134,11 +134,7 @@ class ListAllSongs extends StatelessWidget {
           ),
         );
       }
-      return Text(
-        textAlign: TextAlign.center,
-        "Not Found Songs",
-        style: Theme.of(context).textTheme.labelSmall,
-      );
+      return SizedBox.shrink();
     });
   }
 }

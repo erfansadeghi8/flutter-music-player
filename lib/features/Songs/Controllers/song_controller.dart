@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/core/services/lyra_audio_handler.dart';
@@ -33,6 +32,10 @@ class SongController extends GetxController {
   final Rxn<SongModel> currentSong = Rxn<SongModel>();
   final Rxn<SongModel> nextAndBackSongMusic = Rxn<SongModel>();
 
+  // Current playlist for folder-specific playback
+  final RxList<SongModel> currentPlaylist = <SongModel>[].obs;
+  final RxInt currentPlaylistIndex = 0.obs;
+
   final friesTime = Duration().obs;
   final tottalTime = Duration().obs;
 
@@ -58,11 +61,32 @@ class SongController extends GetxController {
 
   final RxList<FolderMode> foders = <FolderMode>[].obs;
 
+  // Method to set current playlist (e.g., from a folder)
+  void setCurrentPlaylist(List<SongModel> playlist, {int startIndex = 0}) {
+    currentPlaylist.assignAll(playlist);
+    currentPlaylistIndex.value = startIndex.clamp(0, playlist.length - 1);
+  }
+
+  // Clear current playlist (use global songs list)
+  void clearCurrentPlaylist() {
+    currentPlaylist.clear();
+    currentPlaylistIndex.value = 0;
+  }
+
+  // Get the effective playlist (current playlist or global songs)
+  List<SongModel> get effectivePlaylist => currentPlaylist.isEmpty ? songs : currentPlaylist;
+  int get effectiveIndex => currentPlaylist.isEmpty 
+      ? songs.indexWhere((song) => song.id == currentSong.value?.id)
+      : currentPlaylistIndex.value;
+
   // ------------------------------------------------------------
   // LOAD SONGS
   // ------------------------------------------------------------
 
   Future<void> loadSongs() async {
+    // Defer permission request to avoid plugin initialization race condition
+    await Future.delayed(const Duration(milliseconds: 100));
+    
     final permission = await audioQuery.permissionsRequest();
     if (!permission) {
       return;
@@ -84,7 +108,7 @@ class SongController extends GetxController {
       final lastSlash = path.lastIndexOf("/");
       if (lastSlash == -1) continue;
       final folderPath = path.substring(0, lastSlash);
-      final folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
+      // folderPath.substring(folderPath.lastIndexOf("/") + 1);
 
       foldermap.putIfAbsent(folderPath, () => []);
 
@@ -161,8 +185,17 @@ class SongController extends GetxController {
     songRecently.assignAll(date);
   }
 
+  Future<void> loadFavoriteSongs() async {
+    final data = storage.readFavoriteSongsList();
+    final favoriteList = data.map((song) {
+      return ModelFavoriteSongs.fromJson(song);
+    }).toList();
+    favoriteSongs.assignAll(favoriteList);
+  }
+
   Future<void> loadRecentlyData() async {
     await loadSongs();
+    await loadFavoriteSongs();
 
     loadRecentlySong();
 
@@ -200,6 +233,14 @@ class SongController extends GetxController {
 
     final song = currentSong.value;
     if (song == null) return;
+
+    // Update playlist index if using custom playlist
+    if (currentPlaylist.isNotEmpty) {
+      final index = currentPlaylist.indexWhere((s) => s.id == song.id);
+      if (index >= 0) {
+        currentPlaylistIndex.value = index;
+      }
+    }
 
     // صفر کردن موقعیت فقط برای آهنگ جدید
     final lastPos = storage.box.read("savePostionSing");
@@ -264,6 +305,14 @@ class SongController extends GetxController {
     currentSong.value = song;
     nextAndBackSongMusic.value = song;
 
+    // Update currentPlaylistIndex if using a custom playlist
+    if (currentPlaylist.isNotEmpty) {
+      final index = currentPlaylist.indexWhere((s) => s.id == song.id);
+      if (index >= 0) {
+        currentPlaylistIndex.value = index;
+      }
+    }
+
     // ذخیره موقعیت صفر برای آهنگ جدید
     await storage.box.write("savePostionSing", 0);
     await storage.box.write("last_id_song", song.id);
@@ -292,30 +341,29 @@ class SongController extends GetxController {
   }
 
   Future<void> nextSong() async {
-    if (songs.isEmpty || isChangingSong) return;
+    final playlist = effectivePlaylist;
+    if (playlist.isEmpty || isChangingSong) return;
 
     isChangingSong = true;
 
     try {
-      final currentIndex = songs.indexWhere(
-        (song) => song.id == currentSong.value?.id,
-      );
+      final currentIndex = effectiveIndex;
 
       if (currentIndex == -1) return;
 
-      if (isrendom.value && songs.length > 1) {
+      if (isrendom.value && playlist.length > 1) {
         int randomIndex;
 
         do {
-          randomIndex = randomnInt;
+          randomIndex = randoIndex.nextInt(playlist.length);
         } while (randomIndex == currentIndex);
 
         nextIndex.value = randomIndex;
       } else {
-        nextIndex.value = (currentIndex + 1) % songs.length;
+        nextIndex.value = (currentIndex + 1) % playlist.length;
       }
 
-      await _switchToSong(songs[nextIndex.value]);
+      await _switchToSong(playlist[nextIndex.value]);
     } finally {
       isChangingSong = false;
     }
@@ -326,20 +374,19 @@ class SongController extends GetxController {
   // ------------------------------------------------------------
 
   Future<void> backSong() async {
-    if (songs.isEmpty || isChangingSong) return;
+    final playlist = effectivePlaylist;
+    if (playlist.isEmpty || isChangingSong) return;
 
     isChangingSong = true;
 
     try {
-      final currentIndex = songs.indexWhere(
-        (song) => song.id == currentSong.value?.id,
-      );
+      final currentIndex = effectiveIndex;
 
       if (currentIndex == -1) return;
 
-      backIndex.value = (currentIndex - 1 + songs.length) % songs.length;
+      backIndex.value = (currentIndex - 1 + playlist.length) % playlist.length;
 
-      await _switchToSong(songs[backIndex.value]);
+      await _switchToSong(playlist[backIndex.value]);
     } finally {
       isChangingSong = false;
     }
@@ -400,7 +447,7 @@ class SongController extends GetxController {
 
   Future<void> saveToFavorite() async {
     final data = favoriteSongs.map((song) {
-      return song.tostring();
+      return song.toJson();
     }).toList();
 
     await storage.saveFavorite(data);
@@ -571,8 +618,8 @@ class SongController extends GetxController {
   @override
   void onClose() {
     unawaited(saveCurrentPostion());
-    unawaited(lyraHandler.disposeHandler());
-    unawaited(audioPlayer.dispose());
+    // unawaited(lyraHandler.disposeHandler());
+    // unawaited(audioPlayer.dispose());
 
     super.onClose();
   }

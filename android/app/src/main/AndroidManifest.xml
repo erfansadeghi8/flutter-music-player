@@ -19,7 +19,6 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
-
         <receiver
             android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />

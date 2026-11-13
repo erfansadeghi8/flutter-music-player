@@ -15,16 +15,12 @@ class ShowPlayingMusic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (songController.songRecentlyStorage.isEmpty) {
+      final song = songController.currentSong.value;
+
+      if (song == null) {
         return const SizedBox.shrink();
       }
-      final latestSong = songController.songRecentlyStorage.reduce(
-        (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
-      );
-      final song = songController.songs.where(
-        (song) => song.id == latestSong.songId,
-      ).firstOrNull;
-      if (song == null) return const SizedBox.shrink();
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 10, left: 8, right: 8),
         child: InkWell(
@@ -45,45 +41,36 @@ class ShowPlayingMusic extends StatelessWidget {
               color: const Color.fromARGB(40, 163, 163, 163),
             ),
             child: Padding(
-              padding: EdgeInsets.all(4),
-              //row lider
+              padding: const EdgeInsets.all(4),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // row iamge and text
                   Expanded(
                     child: Row(
                       children: [
-                        Container(
+                        SizedBox(
                           width: 70,
                           height: 70,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
                           child: QueryArtworkWidget(
+                            key: ValueKey(song.id),
                             id: song.id,
                             type: ArtworkType.AUDIO,
                             artworkFit: BoxFit.cover,
                             artworkBorder: BorderRadius.circular(10),
-                            nullArtworkWidget: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.asset(
-                                "assets/RecentlyMusic/null_is_poster2.jpg",
-                                fit: BoxFit.cover,
-                              ),
+                            nullArtworkWidget: Image.asset(
+                              "assets/RecentlyMusic/null_is_poster2.jpg",
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 song.title,
-                                overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(
@@ -102,10 +89,9 @@ class ShowPlayingMusic extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 16),
                     child: Obx(() {
                       return IconButton(
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                            Colors.transparent,
-                          ),
+                        style:  IconButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.transparent
                         ),
                         onPressed: () async {
                           if (songController.isplay.value) {
@@ -114,9 +100,12 @@ class ShowPlayingMusic extends StatelessWidget {
                             await songController.playeMusic(song.data);
                           }
                         },
-                        icon: songController.isplay.value
-                            ? Icon(Icons.pause_outlined, size: 40)
-                            : Icon(Icons.play_arrow_outlined, size: 40),
+                        icon: Icon(
+                          songController.isplay.value
+                              ? Icons.pause_outlined
+                              : Icons.play_arrow_outlined,
+                          size: 40,
+                        ),
                       );
                     }),
                   ),

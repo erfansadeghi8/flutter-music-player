@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/instance_manager.dart';
+import 'package:music_player/core/services/lyra_audio_handler.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
 
 class NotificationService {
@@ -10,13 +11,13 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static const int notificaionId = 1;
-  static const String channelId = "sleep_timer_channel";
-  static const String channelNmae = "sleep timer";
-  static const String description = "Notifications for Lyra sleep timer";
+  // Use the same channel as audio_service to avoid duplicate notifications
+  static const String channelId = "com.lyra.channel.audio";
+  static const String channelName = "Lyra Music Player";
+  static const String description = "Notifications for Lyra music playback and sleep timer";
   static const String notifPortName = 'notif_action_port';
 
-
-  static Future<void> initialize() async {
+   static Future<void> initialize() async {
     const AndroidInitializationSettings androidInitializationSettings =
         AndroidInitializationSettings("@mipmap/ic_launcher");
 
@@ -34,7 +35,7 @@ class NotificationService {
     IsolateNameServer.registerPortWithName(receivePort.sendPort, notifPortName);
     receivePort.listen((actionId) => _handleAction(actionId as String?));
 
-    //برای قسمت اجازه دادن اندروید و ایفون که نوتیف میاد برامون
+    // Request notification permission
     await notificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -42,30 +43,41 @@ class NotificationService {
         ?.requestNotificationsPermission();
   }
 
+  // Check if music is currently playing via audio_service
+  static bool get _isMusicPlaying {
+    try {
+      if (Get.isRegistered<LyraAudioHandler>()) {
+        final handler = Get.find<LyraAudioHandler>();
+        return handler.playbackState.value.playing;
+      }
+    } catch (_) {}
+    return false;
+  }
+   
   static Future<void> ShowSleepTimer({
     //زمان باقی مانده رو از بیرون میگیریم
     required String remainingTime,
   }) async {
-    //»شخص کردن تنظیمات نوتیف داخل اندروید
-    final androidDetalis = AndroidNotificationDetails(
+    // Don't show separate sleep timer notification if music is playing
+    // The audio_service notification handles playback controls
+    if (_isMusicPlaying) {
+      return;
+    }
+    
+    final androidDetails = AndroidNotificationDetails(
       channelId,
-      channelNmae,
+      channelName,
       channelDescription: description,
-      //یعنی چقدر نوتیف برای من مهم هست
       importance: Importance.low,
       priority: Priority.low,
-      //یعنی نوتیف تا زمانی که من نبندمش بسته نمیشود
       ongoing: true,
-      //یعنی وقتی کابر روی نوتیف کلیک کرد اندروید خودش نوتیف رو حذف نکنه میخوام که دست خودم باشه
       autoCancel: false,
-      // این برای ابدیت کردن زمان هست
-      //باعث میشه با هر بار تغییر زمان و اپدیت کردن گوشی صدا نده و روی ویوره نره
       onlyAlertOnce: true,
-      // دکمه های نوتیف اینجا تعریف میشود
       color: Color.fromARGB(255, 17, 17, 17),
       actions: [
-        if (Get.put(WidgetTimer()).isTimerRunning.value &&
-            Get.put(WidgetTimer()).isRun.value) ...[
+        if (Get.isRegistered<WidgetTimer>() && 
+            Get.find<WidgetTimer>().isTimerRunning.value &&
+            Get.find<WidgetTimer>().isRun.value) ...[
           AndroidNotificationAction(
             "stop_timer",
             "STOP",
@@ -88,8 +100,7 @@ class NotificationService {
         ],
       ],
     );
-    //اینجا تعزریف کردم برای اندورید میخوام
-    final notificationDetails = NotificationDetails(android: androidDetalis);
+    final notificationDetails = NotificationDetails(android: androidDetails);
     await notificationsPlugin.show(
       id: notificaionId,
       title: "Lyra",
@@ -129,10 +140,13 @@ class NotificationService {
 
 }
 
+// Top-level background handler for notification actions (required by flutter_local_notifications)
 @pragma('vm:entry-point')
 void notificationBackgroundHandler(NotificationResponse response) {
-  final SendPort? port = IsolateNameServer.lookupPortByName(
-    NotificationService.notifPortName,
-  );
-  port?.send(response.actionId);
+  final notifPortName = 'notif_action_port';
+  final receivePort = ReceivePort();
+  IsolateNameServer.removePortNameMapping(notifPortName);
+  IsolateNameServer.registerPortWithName(receivePort.sendPort, notifPortName);
+  receivePort.sendPort.send(response.actionId);
 }
+

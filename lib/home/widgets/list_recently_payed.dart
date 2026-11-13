@@ -30,13 +30,12 @@ class ListRecentlyPayed extends StatelessWidget {
                       onTap: () async {
                         if (songController.isChangingSong) return;
                         songController.isChangingSong = true;
+                        // Set playlist to recently played
+                        songController.setCurrentPlaylist(songController.songRecently);
                         await songController.playeMusic(listmusicrecently.data);
 
                         try {
                           if (songController.isplay.value) {
-                            await songController.playeMusic(
-                              listmusicrecently.data,
-                            );
                             await songController.resetCurrentPostion();
                             songController.addRecentlySong(
                               listmusicrecently.id,
@@ -47,8 +46,6 @@ class ListRecentlyPayed extends StatelessWidget {
                         } finally {
                           songController.isChangingSong = false;
                         }
-                        songController.addRecentlySong(listmusicrecently.id);
-                        await songController.playeMusic(listmusicrecently.data);
                       },
                       child: Container(
                         width: 110,
@@ -73,17 +70,22 @@ class ListRecentlyPayed extends StatelessWidget {
                     SizedBox(
                       width: 110,
                       child: Text(
+                        textAlign: TextAlign.center,
                         listmusicrecently.title,
                         style: Theme.of(context).textTheme.titleMedium,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
-                    Text(
-                      listmusicrecently.artist ?? "Unknown Artist",
-                      maxLines: 1,
-                      style: Theme.of(context).textTheme.labelSmall,
-                      overflow: TextOverflow.ellipsis,
+                    SizedBox(
+                      width: 110,
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        listmusicrecently.artist ?? "Unknown Artist",
+                        style: Theme.of(context).textTheme.labelSmall,
+                        overflow: TextOverflow.clip,
+                        maxLines: 2,
+                      ),
                     ),
                   ],
                 ),
@@ -92,11 +94,7 @@ class ListRecentlyPayed extends StatelessWidget {
           ),
         );
       }
-      return Text(
-        "not recently songs",
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.labelSmall,
-      );
+      return SizedBox.shrink();
     });
   }
 }

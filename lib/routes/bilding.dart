@@ -1,7 +1,6 @@
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/get_instance.dart';
 import 'package:music_player/core/services/lyra_audio_handler.dart';
-import 'package:music_player/core/widgets/splashScreen/splashScreenController/splashScreenController.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
 import 'package:music_player/features/EqualizerPage/equalizerController/equalizer_page_controller.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
@@ -11,13 +10,6 @@ import 'package:music_player/home/homeController/home_controller.dart';
 
 //Made bilding for splashScreenPageBilding
 // ignore: camel_case_types
-class splashScreenPageBilding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => SplashScreenController());
-    Get.lazyPut(() => MainController());
-  }
-}
 
 //Made bilding for WelcomePageBilding
 class WelcomePageBilding extends Bindings {
@@ -62,6 +54,12 @@ class EqualizerBilding extends Bindings {
 }
 
 class PageSeeRecentlyBilding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut(() => SongController());
+  }
+}
+class LibraryListPageBilding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => SongController());
