@@ -1,44 +1,30 @@
-
 import 'dart:async';
-
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 
 class LyraAudioHandler extends BaseAudioHandler with SeekHandler {
-  AudioPlayer? _player;
+  final AudioPlayer player = AudioPlayer();
 
   Future<void> Function()? _onNext;
   Future<void> Function()? _onPrev;
   Future<void> Function()? _onPause;
 
-  bool _keepSessionActive = false;
-
   StreamSubscription? _playbackSubscription;
   StreamSubscription? _playingSubscription;
 
-  Future<void> attach(
-    AudioPlayer player, {
-    required Future<void> Function() onNext,
-    required Future<void> Function() onPrev,
-    required Future<void> Function() onPause,
-  }) async {
-    _player = player;
+  bool _keepSessionActive = false;
 
-    _onNext = onNext;
-    _onPrev = onPrev;
-    _onPause = onPause;
+  LyraAudioHandler() {
+    _initPlayerListeners();
+  }
 
-    await _playbackSubscription?.cancel();
-    await _playingSubscription?.cancel();
-
-    _playbackSubscription =
-        player.playbackEventStream.listen(
+  void _initPlayerListeners() {
+    _playbackSubscription = player.playbackEventStream.listen(
       (_) => _broadcast(),
       onError: (_) => _broadcast(),
     );
 
-    _playingSubscription =
-        player.playingStream.listen((playing) {
+    _playingSubscription = player.playingStream.listen((playing) {
       if (playing) {
         _keepSessionActive = false;
       }
@@ -48,11 +34,18 @@ class LyraAudioHandler extends BaseAudioHandler with SeekHandler {
     _broadcast();
   }
 
-  void _broadcast() {
-    final p = _player;
-    if (p == null) return;
+  void registerCallbacks({
+    Future<void> Function()? onNext,
+    Future<void> Function()? onPrev,
+    Future<void> Function()? onPause,
+  }) {
+    _onNext = onNext;
+    _onPrev = onPrev;
+    _onPause = onPause;
+  }
 
-    final state = p.processingState;
+  void _broadcast() {
+    final state = player.processingState;
 
     final processingState = {
       ProcessingState.idle: AudioProcessingState.idle,
@@ -60,31 +53,32 @@ class LyraAudioHandler extends BaseAudioHandler with SeekHandler {
       ProcessingState.buffering: AudioProcessingState.buffering,
       ProcessingState.ready: AudioProcessingState.ready,
       ProcessingState.completed: AudioProcessingState.completed,
-    }[state]!;
+    }[state] ?? AudioProcessingState.idle;
+
+    final isPlaying = player.playing || _keepSessionActive;
 
     playbackState.add(
       playbackState.value.copyWith(
         controls: [
           MediaControl.skipToPrevious,
-          (p.playing || _keepSessionActive)
-              ? MediaControl.pause
-              : MediaControl.play,
+          isPlaying ? MediaControl.pause : MediaControl.play,
           MediaControl.skipToNext,
         ],
         systemActions: const {
           MediaAction.seek,
+          MediaAction.seekForward,
+          MediaAction.seekBackward,
         },
         androidCompactActionIndices: const [0, 1, 2],
         processingState: processingState,
-        playing: p.playing || _keepSessionActive,
-        updatePosition: p.position,
-        bufferedPosition: p.bufferedPosition,
-        speed: p.speed,
+        playing: isPlaying,
+        updatePosition: player.position,
+        bufferedPosition: player.bufferedPosition,
+        speed: player.speed,
       ),
     );
   }
 
-  // ثبت اطلاعات آهنگ جدید
   void setCurrentMediaItem(MediaItem item) {
     mediaItem.add(item);
     _broadcast();
@@ -92,13 +86,9 @@ class LyraAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> play() async {
-    final p = _player;
-    if (p == null) return;
-
-    _keepSessionActive = true;
+    _keepSessionActive = false;
+    await player.play();
     _broadcast();
-
-    unawaited(p.play());
   }
 
   @override
@@ -108,7 +98,7 @@ class LyraAudioHandler extends BaseAudioHandler with SeekHandler {
     if (_onPause != null) {
       await _onPause!();
     } else {
-      await _player?.pause();
+      await player.pause();
     }
 
     _broadcast();
@@ -116,54 +106,49 @@ class LyraAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> seek(Duration position) async {
-    await _player?.seek(position);
+    await player.seek(position);
   }
 
   @override
   Future<void> skipToNext() async {
-    final wasPlaying = _player?.playing ?? false;
-
-    _keepSessionActive = wasPlaying;
-    _broadcast();
-
-    try {
-      await _onNext?.call();
-    } catch (e) {
-      _keepSessionActive = false;
-      _broadcast();
-      rethrow;
+    if (_onNext != null) {
+      await _onNext!();
     }
+    _broadcast();
   }
 
   @override
   Future<void> skipToPrevious() async {
-    final wasPlaying = _player?.playing ?? false;
-
-    _keepSessionActive = wasPlaying;
-    _broadcast();
-
-    try {
-      await _onPrev?.call();
-    } catch (e) {
-      _keepSessionActive = false;
-      _broadcast();
-      rethrow;
+    if (_onPrev != null) {
+      await _onPrev!();
     }
+    _broadcast();
   }
 
   @override
   Future<void> stop() async {
     _keepSessionActive = false;
-
-    await _player?.pause();
-
+    await player.pause();
     await super.stop();
+  }
+
+  @override
+  Future<void> onTaskRemoved() async {
+    // هنگام بسته شدن صفحه برنامه‌های اخیر،
+    // اگر موسیقی در حال پخش است، آن را متوقف نکن.
+    if (!player.playing) {
+      await stop();
+    }
+  }
+
+  @override
+  Future<void> onNotificationDeleted() async {
+    await stop();
   }
 
   Future<void> disposeHandler() async {
     await _playbackSubscription?.cancel();
     await _playingSubscription?.cancel();
+    await player.dispose();
   }
 }
-
-late LyraAudioHandler lyraHandler;

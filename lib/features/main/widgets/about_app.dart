@@ -41,7 +41,7 @@ class AboutApp extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 30, 20, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   IconButton(
                     style: IconButton.styleFrom(
@@ -54,6 +54,7 @@ class AboutApp extends StatelessWidget {
                   ),
                   Text(
                     "About App",
+                    textAlign: TextAlign.center,
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium!.copyWith(fontSize: 25),
@@ -64,7 +65,7 @@ class AboutApp extends StatelessWidget {
           ),
           SizedBox(height: 30),
           Image.asset(
-            "assets/icon/icon_app.png",
+            "assets/icon_app/icon_app.png",
             width: 100,
             height: 100,
             fit: BoxFit.cover,
@@ -81,7 +82,7 @@ class AboutApp extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
             child: Container(
               width: double.infinity,
-              height: 220,
+              height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 // ignore: deprecated_member_use

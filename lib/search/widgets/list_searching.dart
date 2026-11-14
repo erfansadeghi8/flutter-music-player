@@ -51,9 +51,11 @@ class ListSearching extends StatelessWidget {
 
                       if (songController.isplay.value) {
                         await songController.resetCurrentPostion();
-
                         songController.addRecentlySong(song.id);
+                      }
 
+                      if (!searchPageController.listRecentlySave
+                          .any((s) => s.id == song.id)) {
                         await searchPageController.saveSearchingSongToStorage(
                           song.id,
                         );
@@ -63,7 +65,6 @@ class ListSearching extends StatelessWidget {
                     }
 
                     FocusManager.instance.primaryFocus?.unfocus();
-
                     searchPageController.restListSearching();
                   },
                   child: SizedBox(

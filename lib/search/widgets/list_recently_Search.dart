@@ -1,6 +1,6 @@
+// ignore_for_file: file_names
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/search/searchController/search_controller.dart';

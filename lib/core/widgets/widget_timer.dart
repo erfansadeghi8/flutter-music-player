@@ -6,7 +6,7 @@ import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 
 class WidgetTimer extends GetxController {
   Timer? _timer;
-  final SongController songController = Get.put(SongController());
+  SongController get songController => Get.find<SongController>();
   final isTimerRunning = false.obs;
   int hourValue = 0;
   int minuteValue = 0;

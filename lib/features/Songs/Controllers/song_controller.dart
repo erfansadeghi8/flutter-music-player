@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/core/services/lyra_audio_handler.dart';
@@ -14,6 +15,7 @@ import 'package:music_player/data/models/model_favorite_songs.dart';
 import 'package:music_player/data/models/model_recently_song.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SongController extends GetxController {
   final OnAudioQuery audioQuery = OnAudioQuery();
@@ -25,9 +27,10 @@ class SongController extends GetxController {
 
   final storage = Storage();
 
-  // مهم:
-  // از این به بعد AudioPlayer از just_audio است
-  final AudioPlayer audioPlayer = AudioPlayer();
+  // Single shared AudioPlayer instance owned by LyraAudioHandler
+  LyraAudioHandler get lyraHandler => Get.find<LyraAudioHandler>();
+
+  AudioPlayer get audioPlayer => lyraHandler.player;
 
   final Rxn<SongModel> currentSong = Rxn<SongModel>();
   final Rxn<SongModel> nextAndBackSongMusic = Rxn<SongModel>();
@@ -48,7 +51,7 @@ class SongController extends GetxController {
   RxBool isRepet = false.obs;
   RxBool isrendom = false.obs;
 
-  int get randomnInt => randoIndex.nextInt(songs.length);
+  int get randomnInt => randoIndex.nextInt(songs.isNotEmpty ? songs.length : 1);
 
   RxDouble valueVolum = 50.0.obs;
   RxDouble speedSongValue = 1.0.obs;
@@ -74,30 +77,51 @@ class SongController extends GetxController {
   }
 
   // Get the effective playlist (current playlist or global songs)
-  List<SongModel> get effectivePlaylist => currentPlaylist.isEmpty ? songs : currentPlaylist;
-  int get effectiveIndex => currentPlaylist.isEmpty 
+  List<SongModel> get effectivePlaylist =>
+      currentPlaylist.isEmpty ? songs : currentPlaylist;
+  int get effectiveIndex => currentPlaylist.isEmpty
       ? songs.indexWhere((song) => song.id == currentSong.value?.id)
       : currentPlaylistIndex.value;
 
   // ------------------------------------------------------------
-  // LOAD SONGS
+  // PERMISSIONS & LOAD SONGS
   // ------------------------------------------------------------
 
+  Future<bool> checkAndRequestPermissions() async {
+    if (!Platform.isAndroid) return true;
+
+    // Check if permissions are already granted
+    if (await Permission.audio.isGranted ||
+        await Permission.storage.isGranted) {
+      return true;
+    }
+
+    // On Android 13+ (SDK 33+), READ_MEDIA_AUDIO is required
+    final audioStatus = await Permission.audio.request();
+    if (audioStatus.isGranted) {
+      return true;
+    }
+
+    // On Android 12 and below (such as Samsung SM-A307FN running Android 11, API 30)
+    // READ_EXTERNAL_STORAGE is required
+    final storageStatus = await Permission.storage.request();
+    return storageStatus.isGranted;
+  }
+
   Future<void> loadSongs() async {
-    // Defer permission request to avoid plugin initialization race condition
-    await Future.delayed(const Duration(milliseconds: 100));
-    
-    final permission = await audioQuery.permissionsRequest();
+    final permission = await checkAndRequestPermissions();
     if (!permission) {
       return;
     }
-    final result = await audioQuery.querySongs();
-    songs.assignAll(result);
-    getFolder();
+    try {
+      final result = await audioQuery.querySongs();
+      songs.assignAll(result);
+      getFolder();
+    } catch (_) {}
   }
 
   // ------------------------------------------------------------
-  // RECENTLY SONG
+  // RECENTLY SONG & FOLDERS
   // ------------------------------------------------------------
 
   void getFolder() {
@@ -108,24 +132,23 @@ class SongController extends GetxController {
       final lastSlash = path.lastIndexOf("/");
       if (lastSlash == -1) continue;
       final folderPath = path.substring(0, lastSlash);
-      // folderPath.substring(folderPath.lastIndexOf("/") + 1);
 
       foldermap.putIfAbsent(folderPath, () => []);
-
       foldermap[folderPath]!.add(song);
-
-      foders.assignAll(
-        foldermap.entries.map((entry) {
-          final path = entry.key;
-
-          return FolderMode(
-            name: path.substring(path.lastIndexOf("/") + 1),
-            path: path,
-            songs: entry.value,
-          );
-        }).toList(),
-      );
     }
+
+    // Assign folders ONCE outside the loop to avoid UI thread freezes
+    foders.assignAll(
+      foldermap.entries.map((entry) {
+        final path = entry.key;
+
+        return FolderMode(
+          name: path.substring(path.lastIndexOf("/") + 1),
+          path: path,
+          songs: entry.value,
+        );
+      }).toList(),
+    );
   }
 
   void saveRecentlyGetstorage() {
@@ -289,7 +312,6 @@ class SongController extends GetxController {
     await audioPlayer.pause();
     saveCurrentPostion();
     isplay.value = false;
-    // sortRecentlySongs();
   }
 
   // ------------------------------------------------------------
@@ -297,41 +319,39 @@ class SongController extends GetxController {
   // ------------------------------------------------------------
 
   Future<void> _switchToSong(SongModel song) async {
-    final wasPlaying =
-        audioPlayer.playing ||
-        audioPlayer.processingState == ProcessingState.completed ||
-        isplay.value;
+    final wasPlaying = audioPlayer.playing || isplay.value;
 
     currentSong.value = song;
     nextAndBackSongMusic.value = song;
 
-    // Update currentPlaylistIndex if using a custom playlist
     if (currentPlaylist.isNotEmpty) {
       final index = currentPlaylist.indexWhere((s) => s.id == song.id);
+
       if (index >= 0) {
         currentPlaylistIndex.value = index;
       }
     }
 
-    // ذخیره موقعیت صفر برای آهنگ جدید
     await storage.box.write("savePostionSing", 0);
     await storage.box.write("last_id_song", song.id);
 
     addRecentlySong(song.id);
 
-    // ارسال سریع اطلاعات آهنگ
-    await _updateNotification();
-
     try {
+      // ابتدا آهنگ جدید بارگذاری شود
       await audioPlayer.setFilePath(song.data);
 
+      // جلوگیری از اعمال اطلاعات آهنگ قبلی
       if (currentSong.value?.id != song.id) return;
 
-      isplay.value = wasPlaying;
+      // بعد از بارگذاری، اطلاعات نوتیفیکیشن به‌روز شود
+      await _updateNotification();
 
       if (wasPlaying) {
-        unawaited(audioPlayer.play());
+        isplay.value = true;
+        await audioPlayer.play();
       } else {
+        isplay.value = false;
         await audioPlayer.pause();
       }
     } catch (e) {
@@ -397,6 +417,7 @@ class SongController extends GetxController {
   // ------------------------------------------------------------
 
   void initplayer() {
+    isplay.value = audioPlayer.playing;
     // Position
     audioPlayer.positionStream.listen((position) {
       friesTime.value = position;
@@ -491,14 +512,21 @@ class SongController extends GetxController {
 
   Future<Uint8List?> _loadArtwork(SongModel song) async {
     if (_artCache.containsKey(song.id)) return _artCache[song.id];
-    final bytes = await OnAudioQuery().queryArtwork(
-      song.id,
-      ArtworkType.AUDIO,
-      size: 1000,
-      quality: 100,
-    );
-    _artCache[song.id] = bytes;
-    return bytes;
+    try {
+      final bytes = await audioQuery.queryArtwork(
+        song.id,
+        ArtworkType.AUDIO,
+        size: 500,
+        quality: 85,
+      );
+      if (_artCache.length > 50) {
+        _artCache.remove(_artCache.keys.first);
+      }
+      _artCache[song.id] = bytes;
+      return bytes;
+    } catch (_) {
+      return null;
+    }
   }
 
   void sortRecentlySongs() {
@@ -530,14 +558,15 @@ class SongController extends GetxController {
 
     initplayer();
 
-    lyraHandler.attach(
-      audioPlayer,
+    lyraHandler.registerCallbacks(
       onNext: nextSong,
       onPrev: backSong,
       onPause: pussMusic,
     );
 
-    loadRecentlyData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadRecentlyData();
+    });
 
     ever(currentSong, (song) async {
       if (song == null) return;
@@ -553,19 +582,23 @@ class SongController extends GetxController {
   }
 
   Future<Uri?> _saveArtwork(SongModel song) async {
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/art_${song.id}.jpg');
-    if (!await file.exists()) {
-      final bytes = await audioQuery.queryArtwork(
-        song.id,
-        ArtworkType.AUDIO,
-        format: ArtworkFormat.JPEG,
-        size: 500,
-      );
-      if (bytes == null) return null;
-      await file.writeAsBytes(bytes);
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/art_${song.id}.jpg');
+      if (!await file.exists()) {
+        final bytes = await audioQuery.queryArtwork(
+          song.id,
+          ArtworkType.AUDIO,
+          format: ArtworkFormat.JPEG,
+          size: 500,
+        );
+        if (bytes == null) return null;
+        await file.writeAsBytes(bytes);
+      }
+      return file.uri;
+    } catch (_) {
+      return null;
     }
-    return file.uri;
   }
 
   Future<void> _updateNotification() async {
@@ -618,9 +651,6 @@ class SongController extends GetxController {
   @override
   void onClose() {
     unawaited(saveCurrentPostion());
-    // unawaited(lyraHandler.disposeHandler());
-    // unawaited(audioPlayer.dispose());
-
     super.onClose();
   }
 }

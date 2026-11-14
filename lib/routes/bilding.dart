@@ -1,9 +1,5 @@
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:music_player/core/services/lyra_audio_handler.dart';
-import 'package:music_player/core/widgets/widget_timer.dart';
+import 'package:get/get.dart';
 import 'package:music_player/features/EqualizerPage/equalizerController/equalizer_page_controller.dart';
-import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
@@ -23,18 +19,14 @@ class WelcomePageBilding extends Bindings {
 class MainScreenBilding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => MainController(),);
-    Get.lazyPut(() => SongController());
-    Get.put(WidgetTimer(), permanent: true);
+    Get.lazyPut(() => MainController());
   }
 }
 
 class SongControllerBilding extends Bindings {
   @override
   void dependencies() {
-    Get.put(SongController());
     Get.lazyPut(() => EqualizerController());
-    Get.put(LyraAudioHandler());
   }
 }
 
@@ -55,13 +47,10 @@ class EqualizerBilding extends Bindings {
 
 class PageSeeRecentlyBilding extends Bindings {
   @override
-  void dependencies() {
-    Get.lazyPut(() => SongController());
-  }
+  void dependencies() {}
 }
+
 class LibraryListPageBilding extends Bindings {
   @override
-  void dependencies() {
-    Get.lazyPut(() => SongController());
-  }
+  void dependencies() {}
 }

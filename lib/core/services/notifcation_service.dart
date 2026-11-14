@@ -11,36 +11,43 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static const int notificaionId = 1;
-  // Use the same channel as audio_service to avoid duplicate notifications
-  static const String channelId = "com.lyra.channel.audio";
-  static const String channelName = "Lyra Music Player";
-  static const String description = "Notifications for Lyra music playback and sleep timer";
+  // Use dedicated timer channel to prevent interference with media playback notification
+  static const String channelId = "com.lyra.channel.timer";
+  static const String channelName = "Lyra Sleep Timer";
+  static const String description = "Notifications for Lyra sleep timer";
   static const String notifPortName = 'notif_action_port';
 
-   static Future<void> initialize() async {
-    const AndroidInitializationSettings androidInitializationSettings =
-        AndroidInitializationSettings("@mipmap/ic_launcher");
+  static bool _initialized = false;
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: androidInitializationSettings);
+  static Future<void> initialize() async {
+    if (_initialized) return;
+    try {
+      const AndroidInitializationSettings androidInitializationSettings =
+          AndroidInitializationSettings("@mipmap/ic_launcher");
 
-    await notificationsPlugin.initialize(
-      settings: initializationSettings,
-      onDidReceiveNotificationResponse: onNotificationResponse,
-      onDidReceiveBackgroundNotificationResponse: notificationBackgroundHandler,
-    );
+      const InitializationSettings initializationSettings =
+          InitializationSettings(android: androidInitializationSettings);
 
-    final receivePort = ReceivePort();
-    IsolateNameServer.removePortNameMapping(notifPortName);
-    IsolateNameServer.registerPortWithName(receivePort.sendPort, notifPortName);
-    receivePort.listen((actionId) => _handleAction(actionId as String?));
+      await notificationsPlugin.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse: onNotificationResponse,
+      );
 
-    // Request notification permission
-    await notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+      final receivePort = ReceivePort();
+      IsolateNameServer.removePortNameMapping(notifPortName);
+      IsolateNameServer.registerPortWithName(
+          receivePort.sendPort, notifPortName);
+      receivePort.listen((actionId) => _handleAction(actionId as String?));
+
+      // Clear stale sleep-timer notification left from previous app session.
+      try {
+        await notificationsPlugin.cancel(id: notificaionId);
+      } catch (_) {}
+
+      _initialized = true;
+    } catch (_) {
+      // Avoid crashing app startup if local notifications cannot initialize.
+    }
   }
 
   // Check if music is currently playing via audio_service
@@ -73,25 +80,25 @@ class NotificationService {
       ongoing: true,
       autoCancel: false,
       onlyAlertOnce: true,
-      color: Color.fromARGB(255, 17, 17, 17),
+      color: const Color.fromARGB(255, 17, 17, 17),
       actions: [
         if (Get.isRegistered<WidgetTimer>() && 
             Get.find<WidgetTimer>().isTimerRunning.value &&
             Get.find<WidgetTimer>().isRun.value) ...[
-          AndroidNotificationAction(
+          const AndroidNotificationAction(
             "stop_timer",
             "STOP",
             showsUserInterface: false,
             cancelNotification: false,
           ),
         ] else ...[
-          AndroidNotificationAction(
+          const AndroidNotificationAction(
             "Cancel_timer",
             "Cancel",
             showsUserInterface: false,
             cancelNotification: false,
           ),
-          AndroidNotificationAction(
+          const AndroidNotificationAction(
             "run_timer",
             "Run",
             showsUserInterface: false,
@@ -137,16 +144,4 @@ class NotificationService {
       timer.cancellTimer();
     }
   }
-
 }
-
-// Top-level background handler for notification actions (required by flutter_local_notifications)
-@pragma('vm:entry-point')
-void notificationBackgroundHandler(NotificationResponse response) {
-  final notifPortName = 'notif_action_port';
-  final receivePort = ReceivePort();
-  IsolateNameServer.removePortNameMapping(notifPortName);
-  IsolateNameServer.registerPortWithName(receivePort.sendPort, notifPortName);
-  receivePort.sendPort.send(response.actionId);
-}
-

@@ -57,14 +57,11 @@ class SearchPageController extends GetxController {
   Future<void> saveSearchingSongToStorage(
     int songId,
   ) async {
+    if (listRecentlySave.any((item) => item.id == songId)) return;
+
     final existing = storage.readSaveSearchingSong();
-
-    // حذف شناسه تکراری
     existing.removeWhere((id) => id == songId);
-
-    // قرار دادن آهنگ در ابتدای لیست
     existing.insert(0, songId);
-
     await storage.saveSearchingSong(existing);
 
     final song = songController.songs.firstWhereOrNull(
@@ -72,10 +69,6 @@ class SearchPageController extends GetxController {
     );
 
     if (song != null) {
-      listRecentlySave.removeWhere(
-        (item) => item.id == songId,
-      );
-
       listRecentlySave.insert(0, song);
     }
   }
