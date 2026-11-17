@@ -27,15 +27,15 @@ class SongController extends GetxController {
 
   final storage = Storage();
 
-  // Single shared AudioPlayer instance owned by LyraAudioHandler
+  // ── Single shared AudioPlayer owned by LyraAudioHandler ──────────────────
   LyraAudioHandler get lyraHandler => Get.find<LyraAudioHandler>();
-
   AudioPlayer get audioPlayer => lyraHandler.player;
 
   final Rxn<SongModel> currentSong = Rxn<SongModel>();
   final Rxn<SongModel> nextAndBackSongMusic = Rxn<SongModel>();
 
-  // Current playlist for folder-specific playback
+  // ── Playlist state lives in LyraAudioHandler (background-safe). ──────────
+  // These Rx mirrors exist only for UI reactivity.
   final RxList<SongModel> currentPlaylist = <SongModel>[].obs;
   final RxInt currentPlaylistIndex = 0.obs;
 
@@ -64,65 +64,63 @@ class SongController extends GetxController {
 
   final RxList<FolderMode> foders = <FolderMode>[].obs;
 
-  // Method to set current playlist (e.g., from a folder)
+  // ── Playlist helpers ──────────────────────────────────────────────────────
+
   void setCurrentPlaylist(List<SongModel> playlist, {int startIndex = 0}) {
     currentPlaylist.assignAll(playlist);
-    currentPlaylistIndex.value = startIndex.clamp(0, playlist.length - 1);
+    final clamped = startIndex.clamp(0, playlist.isEmpty ? 0 : playlist.length - 1);
+    currentPlaylistIndex.value = clamped;
+    // Sync to handler so background Next/Prev uses the same list.
+    lyraHandler.setPlaylist(playlist, startIndex: clamped);
   }
 
-  // Clear current playlist (use global songs list)
   void clearCurrentPlaylist() {
     currentPlaylist.clear();
     currentPlaylistIndex.value = 0;
+    // Sync handler to global songs list.
+    lyraHandler.setPlaylist(songs, startIndex: _globalIndex);
   }
 
-  // Get the effective playlist (current playlist or global songs)
   List<SongModel> get effectivePlaylist =>
       currentPlaylist.isEmpty ? songs : currentPlaylist;
+
   int get effectiveIndex => currentPlaylist.isEmpty
-      ? songs.indexWhere((song) => song.id == currentSong.value?.id)
+      ? _globalIndex
       : currentPlaylistIndex.value;
 
-  // ------------------------------------------------------------
-  // PERMISSIONS & LOAD SONGS
-  // ------------------------------------------------------------
+  int get _globalIndex =>
+      songs.indexWhere((s) => s.id == currentSong.value?.id);
+
+  // ── Permissions & Load Songs ──────────────────────────────────────────────
 
   Future<bool> checkAndRequestPermissions() async {
     if (!Platform.isAndroid) return true;
 
-    // Check if permissions are already granted
-    if (await Permission.audio.isGranted ||
-        await Permission.storage.isGranted) {
+    if (await Permission.audio.isGranted || await Permission.storage.isGranted) {
       return true;
     }
 
-    // On Android 13+ (SDK 33+), READ_MEDIA_AUDIO is required
     final audioStatus = await Permission.audio.request();
-    if (audioStatus.isGranted) {
-      return true;
-    }
+    if (audioStatus.isGranted) return true;
 
-    // On Android 12 and below (such as Samsung SM-A307FN running Android 11, API 30)
-    // READ_EXTERNAL_STORAGE is required
     final storageStatus = await Permission.storage.request();
     return storageStatus.isGranted;
   }
 
   Future<void> loadSongs() async {
     final permission = await checkAndRequestPermissions();
-    if (!permission) {
-      return;
-    }
+    if (!permission) return;
     try {
       final result = await audioQuery.querySongs();
       songs.assignAll(result);
       getFolder();
+      // Seed the handler's playlist with all songs so background next/prev
+      // has something to work with even before the user picks a playlist.
+      lyraHandler.setPlaylist(songs, startIndex: 0);
     } catch (_) {}
   }
 
-  // ------------------------------------------------------------
-  // RECENTLY SONG & FOLDERS
-  // ------------------------------------------------------------
+  // ── Recently & Folders ────────────────────────────────────────────────────
 
   void getFolder() {
     final Map<String, List<SongModel>> foldermap = {};
@@ -137,11 +135,9 @@ class SongController extends GetxController {
       foldermap[folderPath]!.add(song);
     }
 
-    // Assign folders ONCE outside the loop to avoid UI thread freezes
     foders.assignAll(
       foldermap.entries.map((entry) {
         final path = entry.key;
-
         return FolderMode(
           name: path.substring(path.lastIndexOf("/") + 1),
           path: path,
@@ -152,26 +148,18 @@ class SongController extends GetxController {
   }
 
   void saveRecentlyGetstorage() {
-    final date = songRecentlyStorage.map((song) {
-      return song.toJson();
-    }).toList();
-
+    final date = songRecentlyStorage.map((song) => song.toJson()).toList();
     storage.saveReently(date);
   }
 
   void loadRecentlySong() {
     final readData = storage.readSaveRecentlySong();
-
-    final recentlyList = readData.map((song) {
-      return ModelRecentlySong.fromJson(song);
-    }).toList();
-
+    final recentlyList = readData.map((song) => ModelRecentlySong.fromJson(song)).toList();
     final oldLength = recentlyList.length;
 
-    recentlyList.removeWhere((song) {
-      return DateTime.now().difference(song.lastPlayedAt) >=
-          const Duration(days: 30);
-    });
+    recentlyList.removeWhere(
+      (song) => DateTime.now().difference(song.lastPlayedAt) >= const Duration(days: 30),
+    );
 
     songRecentlyStorage.assignAll(recentlyList);
 
@@ -184,15 +172,10 @@ class SongController extends GetxController {
     final isExist = songRecentlyStorage.any((song) => song.songId == id);
 
     if (isExist) {
-      final date = songRecentlyStorage.firstWhere(
-        (element) => element.songId == id,
-      );
-
+      final date = songRecentlyStorage.firstWhere((e) => e.songId == id);
       date.lastPlayedAt = DateTime.now();
     } else {
-      songRecentlyStorage.add(
-        ModelRecentlySong(songId: id, lastPlayedAt: DateTime.now()),
-      );
+      songRecentlyStorage.add(ModelRecentlySong(songId: id, lastPlayedAt: DateTime.now()));
     }
 
     saveRecentlyGetstorage();
@@ -201,18 +184,15 @@ class SongController extends GetxController {
   }
 
   void updateRecentlySong() {
-    final date = songs.where((song) {
-      return songRecentlyStorage.any((result) => result.songId == song.id);
-    }).toList();
-
+    final date = songs.where(
+      (song) => songRecentlyStorage.any((r) => r.songId == song.id),
+    ).toList();
     songRecently.assignAll(date);
   }
 
   Future<void> loadFavoriteSongs() async {
     final data = storage.readFavoriteSongsList();
-    final favoriteList = data.map((song) {
-      return ModelFavoriteSongs.fromJson(song);
-    }).toList();
+    final favoriteList = data.map((s) => ModelFavoriteSongs.fromJson(s)).toList();
     favoriteSongs.assignAll(favoriteList);
   }
 
@@ -221,7 +201,6 @@ class SongController extends GetxController {
     await loadFavoriteSongs();
 
     loadRecentlySong();
-
     updateRecentlySong();
 
     if (songRecently.isNotEmpty) {
@@ -229,27 +208,21 @@ class SongController extends GetxController {
         (a, b) => a.lastPlayedAt.isAfter(b.lastPlayedAt) ? a : b,
       );
 
-      final currentIndex = songs.indexWhere(
-        (song) => song.id == latestSong.songId,
-      );
-
+      final currentIndex = songs.indexWhere((s) => s.id == latestSong.songId);
       if (currentIndex >= 0) {
         currentSong.value = songs[currentIndex];
+        // Seed handler index to the last-played song.
+        lyraHandler.setCurrentIndex(currentIndex);
       }
     }
   }
 
-  // ------------------------------------------------------------
-  // PLAY MUSIC
-  // ------------------------------------------------------------
+  // ── Play ──────────────────────────────────────────────────────────────────
 
   Future<void> playeMusic(String urlmusic) async {
     if (urlmusic.isEmpty) return;
 
-    final selectedSong = songs.firstWhereOrNull(
-      (song) => song.data == urlmusic,
-    );
-
+    final selectedSong = songs.firstWhereOrNull((s) => s.data == urlmusic);
     if (selectedSong != null) {
       currentSong.value = selectedSong;
     }
@@ -257,46 +230,32 @@ class SongController extends GetxController {
     final song = currentSong.value;
     if (song == null) return;
 
-    // Update playlist index if using custom playlist
-    if (currentPlaylist.isNotEmpty) {
-      final index = currentPlaylist.indexWhere((s) => s.id == song.id);
-      if (index >= 0) {
-        currentPlaylistIndex.value = index;
-      }
+    // Update handler playlist index to this song.
+    final handlerList = lyraHandler.playlist;
+    final handlerIdx = handlerList.indexWhere((s) => s.id == song.id);
+    if (handlerIdx >= 0) {
+      lyraHandler.setCurrentIndex(handlerIdx);
     }
 
-    // صفر کردن موقعیت فقط برای آهنگ جدید
+    // Update playlist index mirror for UI.
+    if (currentPlaylist.isNotEmpty) {
+      final idx = currentPlaylist.indexWhere((s) => s.id == song.id);
+      if (idx >= 0) currentPlaylistIndex.value = idx;
+    }
+
+    // Resume from saved position only when reopening the same song.
     final lastPos = storage.box.read("savePostionSing");
     final lastId = storage.box.read("last_id_song");
-
     Duration? initial;
-
     if (lastId == song.id && lastPos != null && lastPos > 0) {
       initial = Duration(milliseconds: lastPos);
     }
 
-    // ارسال فوری اطلاعات آهنگ جدید
     await _updateNotification();
 
     try {
       await audioPlayer.setFilePath(urlmusic, initialPosition: initial);
-
-      // بروزرسانی مدت واقعی آهنگ
-      if (currentSong.value?.id == song.id) {
-        lyraHandler.setCurrentMediaItem(
-          MediaItem(
-            id: song.id.toString(),
-            title: song.title,
-            artist: song.artist ?? 'Unknown Artist',
-            album: song.album,
-            duration: audioPlayer.duration,
-            artUri: lyraHandler.mediaItem.value?.artUri,
-          ),
-        );
-      }
-
       isplay.value = true;
-
       unawaited(audioPlayer.play());
     } catch (e) {
       isplay.value = false;
@@ -304,9 +263,7 @@ class SongController extends GetxController {
     }
   }
 
-  // ------------------------------------------------------------
-  // PAUSE
-  // ------------------------------------------------------------
+  // ── Pause ─────────────────────────────────────────────────────────────────
 
   Future<void> pussMusic() async {
     await audioPlayer.pause();
@@ -314,9 +271,7 @@ class SongController extends GetxController {
     isplay.value = false;
   }
 
-  // ------------------------------------------------------------
-  // NEXT SONG
-  // ------------------------------------------------------------
+  // ── Internal song switch (UI-initiated) ───────────────────────────────────
 
   Future<void> _switchToSong(SongModel song) async {
     final wasPlaying = audioPlayer.playing || isplay.value;
@@ -324,32 +279,30 @@ class SongController extends GetxController {
     currentSong.value = song;
     nextAndBackSongMusic.value = song;
 
-    if (currentPlaylist.isNotEmpty) {
-      final index = currentPlaylist.indexWhere((s) => s.id == song.id);
+    // Update handler index.
+    final handlerList = lyraHandler.playlist;
+    final handlerIdx = handlerList.indexWhere((s) => s.id == song.id);
+    if (handlerIdx >= 0) lyraHandler.setCurrentIndex(handlerIdx);
 
-      if (index >= 0) {
-        currentPlaylistIndex.value = index;
-      }
+    if (currentPlaylist.isNotEmpty) {
+      final idx = currentPlaylist.indexWhere((s) => s.id == song.id);
+      if (idx >= 0) currentPlaylistIndex.value = idx;
     }
 
     await storage.box.write("savePostionSing", 0);
     await storage.box.write("last_id_song", song.id);
-
     addRecentlySong(song.id);
 
+    await _updateNotification();
+
     try {
-      // ابتدا آهنگ جدید بارگذاری شود
       await audioPlayer.setFilePath(song.data);
 
-      // جلوگیری از اعمال اطلاعات آهنگ قبلی
       if (currentSong.value?.id != song.id) return;
-
-      // بعد از بارگذاری، اطلاعات نوتیفیکیشن به‌روز شود
-      await _updateNotification();
 
       if (wasPlaying) {
         isplay.value = true;
-        await audioPlayer.play();
+        unawaited(audioPlayer.play());
       } else {
         isplay.value = false;
         await audioPlayer.pause();
@@ -360,6 +313,11 @@ class SongController extends GetxController {
     }
   }
 
+  // ── Next / Previous (UI-initiated) ───────────────────────────────────────
+  // These are called from the UI only. The actual background-safe skip logic
+  // lives in LyraAudioHandler._advanceNext / _advancePrev and is called by
+  // the handler's skipToNext / skipToPrevious overrides.
+
   Future<void> nextSong() async {
     final playlist = effectivePlaylist;
     if (playlist.isEmpty || isChangingSong) return;
@@ -368,30 +326,23 @@ class SongController extends GetxController {
 
     try {
       final currentIndex = effectiveIndex;
-
       if (currentIndex == -1) return;
 
+      int newIndex;
       if (isrendom.value && playlist.length > 1) {
-        int randomIndex;
-
-        do {
-          randomIndex = randoIndex.nextInt(playlist.length);
-        } while (randomIndex == currentIndex);
-
-        nextIndex.value = randomIndex;
+        do { newIndex = randoIndex.nextInt(playlist.length); } while (newIndex == currentIndex);
       } else {
-        nextIndex.value = (currentIndex + 1) % playlist.length;
+        newIndex = (currentIndex + 1) % playlist.length;
       }
 
-      await _switchToSong(playlist[nextIndex.value]);
+      nextIndex.value = newIndex;
+      await _switchToSong(playlist[newIndex]);
+    } catch (e) {
+      isplay.value = false;
     } finally {
       isChangingSong = false;
     }
   }
-
-  // ------------------------------------------------------------
-  // BACK SONG
-  // ------------------------------------------------------------
 
   Future<void> backSong() async {
     final playlist = effectivePlaylist;
@@ -401,104 +352,75 @@ class SongController extends GetxController {
 
     try {
       final currentIndex = effectiveIndex;
-
       if (currentIndex == -1) return;
 
       backIndex.value = (currentIndex - 1 + playlist.length) % playlist.length;
-
       await _switchToSong(playlist[backIndex.value]);
     } finally {
       isChangingSong = false;
     }
   }
 
-  // ------------------------------------------------------------
-  // PLAYER LISTENERS
-  // ------------------------------------------------------------
+  // ── Player listeners ──────────────────────────────────────────────────────
 
   void initplayer() {
     isplay.value = audioPlayer.playing;
-    // Position
+
     audioPlayer.positionStream.listen((position) {
       friesTime.value = position;
     });
 
-    // Duration
     audioPlayer.durationStream.listen((duration) {
-      if (duration != null) {
-        tottalTime.value = duration;
-      }
+      if (duration != null) tottalTime.value = duration;
     });
 
-    // Player state
-    audioPlayer.playerStateStream.listen((state) async {
-      // وضعیت پخش
+    // Sync isplay from actual player state.
+    // Song completion / auto-advance is handled inside LyraAudioHandler's
+    // playerStateStream listener so it works in the background too.
+    audioPlayer.playerStateStream.listen((state) {
       isplay.value = state.playing;
-
-      // وقتی آهنگ کامل شد
-      if (state.processingState == ProcessingState.completed) {
-        if (isRepet.value) {
-          await playeMusic(currentSong.value!.data);
-        } else {
-          await nextSong();
-
-          await storage.box.write("savePostionSing", 0);
-
-          await storage.box.write("last_id_song", currentSong.value?.id);
-        }
-      }
     });
+
+    // When the handler advances a song in the background, sync UI state.
+    lyraHandler.onSongChanged = (index) {
+      final list = lyraHandler.playlist;
+      if (index < 0 || index >= list.length) return;
+      final song = list[index];
+      currentSong.value = song;
+      nextAndBackSongMusic.value = song;
+      currentPlaylistIndex.value = index;
+      addRecentlySong(song.id);
+    };
   }
 
-  // ------------------------------------------------------------
-  // FAVORITE
-  // ------------------------------------------------------------
+  // ── Favorites ─────────────────────────────────────────────────────────────
 
   Future<void> toggleFavorite(int songid) async {
-    final index = favoriteSongs.indexWhere((song) => song.songId == songid);
-
+    final index = favoriteSongs.indexWhere((s) => s.songId == songid);
     if (index >= 0) {
       favoriteSongs.removeAt(index);
     } else {
       favoriteSongs.add(ModelFavoriteSongs(isFavorite: true, songId: songid));
     }
-
     await saveToFavorite();
   }
 
   Future<void> saveToFavorite() async {
-    final data = favoriteSongs.map((song) {
-      return song.toJson();
-    }).toList();
-
+    final data = favoriteSongs.map((s) => s.toJson()).toList();
     await storage.saveFavorite(data);
   }
 
-  // ------------------------------------------------------------
-  // VOLUME
-  // ------------------------------------------------------------
+  // ── Volume / Speed ────────────────────────────────────────────────────────
 
-  Future<void> volumSong() async {
-    await audioPlayer.setVolume(valueVolum.value);
-  }
+  Future<void> volumSong() async => audioPlayer.setVolume(valueVolum.value);
+  Future<void> speedSong() async => audioPlayer.setSpeed(speedSongValue.value);
 
-  // ------------------------------------------------------------
-  // SPEED
-  // ------------------------------------------------------------
-
-  Future<void> speedSong() async {
-    await audioPlayer.setSpeed(speedSongValue.value);
-  }
-
-  // ------------------------------------------------------------
-  // SAVE POSITION
-  // ------------------------------------------------------------
+  // ── Position ──────────────────────────────────────────────────────────────
 
   Future<void> saveCurrentPostion() async {
     final position = audioPlayer.position;
     if (currentSong.value != null) {
       await storage.box.write("savePostionSing", position.inMilliseconds);
-
       await storage.box.write("last_id_song", currentSong.value!.id);
     }
   }
@@ -510,6 +432,8 @@ class SongController extends GetxController {
     }
   }
 
+  // ── Artwork helpers ───────────────────────────────────────────────────────
+
   Future<Uint8List?> _loadArtwork(SongModel song) async {
     if (_artCache.containsKey(song.id)) return _artCache[song.id];
     try {
@@ -519,9 +443,7 @@ class SongController extends GetxController {
         size: 500,
         quality: 85,
       );
-      if (_artCache.length > 50) {
-        _artCache.remove(_artCache.keys.first);
-      }
+      if (_artCache.length > 50) _artCache.remove(_artCache.keys.first);
       _artCache[song.id] = bytes;
       return bytes;
     } catch (_) {
@@ -531,26 +453,19 @@ class SongController extends GetxController {
 
   void sortRecentlySongs() {
     songRecently.sort((a, b) {
-      final recordA = songRecentlyStorage.firstWhereOrNull(
-        (item) => item.songId == a.id,
-      );
-
-      final recordB = songRecentlyStorage.firstWhereOrNull(
-        (item) => item.songId == b.id,
-      );
-
+      final recordA = songRecentlyStorage.firstWhereOrNull((i) => i.songId == a.id);
+      final recordB = songRecentlyStorage.firstWhereOrNull((i) => i.songId == b.id);
       final timeA = recordA?.lastPlayedAt;
       final timeB = recordB?.lastPlayedAt;
-
       if (timeA == null && timeB == null) return 0;
       if (timeA == null) return 1;
       if (timeB == null) return -1;
-
       return timeB.compareTo(timeA);
     });
-
     songRecently.refresh();
   }
+
+  // ── onInit ────────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
@@ -558,28 +473,25 @@ class SongController extends GetxController {
 
     initplayer();
 
-    lyraHandler.registerCallbacks(
-      onNext: nextSong,
-      onPrev: backSong,
-      onPause: pussMusic,
-    );
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadRecentlyData();
     });
 
     ever(currentSong, (song) async {
       if (song == null) return;
-
       final bytes = await _loadArtwork(song);
-
       if (currentSong.value?.id == song.id) {
         currentArt.value = bytes;
       }
-
       _preloadNeighbors();
     });
+
+    // Keep handler random/repeat flags in sync.
+    ever(isrendom, (val) => lyraHandler.setRandom(val));
+    ever(isRepet, (val) => lyraHandler.setRepeat(val));
   }
+
+  // ── Notification ──────────────────────────────────────────────────────────
 
   Future<Uri?> _saveArtwork(SongModel song) async {
     try {
@@ -606,36 +518,25 @@ class SongController extends GetxController {
     if (song == null) return;
 
     final item = MediaItem(
-      id: song.id.toString(),
+      id: song.data,
       title: song.title,
       artist: song.artist ?? 'Unknown Artist',
       album: song.album,
-      duration:
-          audioPlayer.duration ?? Duration(milliseconds: song.duration ?? 0),
+      duration: audioPlayer.duration ?? Duration(milliseconds: song.duration ?? 0),
     );
-
-    // ارسال فوری اطلاعات
     lyraHandler.setCurrentMediaItem(item);
-
-    // بارگذاری کاور بدون متوقف کردن روند تعویض آهنگ
     unawaited(_updateArtwork(song, item));
   }
 
   Future<void> _updateArtwork(SongModel song, MediaItem item) async {
     try {
       final artworkUri = await _saveArtwork(song);
-
       if (artworkUri == null) return;
-
       if (currentSong.value?.id != song.id) return;
-
       lyraHandler.setCurrentMediaItem(item.copyWith(artUri: artworkUri));
-    } catch (e) {
-      // خطای کاور نباید پخش را متوقف کند.
-    }
+    } catch (_) {}
   }
 
-  // بیرون از onInit، به عنوان متد کلاس
   void _preloadNeighbors() {
     final i = songs.indexWhere((s) => s.id == currentSong.value?.id);
     if (i == -1) return;
@@ -644,13 +545,14 @@ class SongController extends GetxController {
     }
   }
 
-  // ------------------------------------------------------------
-  // ON CLOSE
-  // ------------------------------------------------------------
+  // ── onClose ───────────────────────────────────────────────────────────────
 
   @override
   void onClose() {
+    // Save position but do NOT stop/dispose the player or the audio service.
     unawaited(saveCurrentPostion());
+    // Detach the UI callback so stale references don't leak.
+    lyraHandler.onSongChanged = null;
     super.onClose();
   }
 }

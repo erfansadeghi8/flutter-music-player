@@ -18,27 +18,29 @@ Future<void> main() async {
 
   await GetStorage.init();
 
-  // Initialize AudioService exactly once.
-  final LyraAudioHandler handler = await AudioService.init<LyraAudioHandler>(
+  // ── Initialize AudioService exactly once ──────────────────────────────────
+  // AudioService.init is idempotent on Android: if the service is already
+  // running (e.g. the user re-opens the app after swiping it away), it
+  // reconnects to the existing handler instead of creating a new one.
+  final handler = await AudioService.init(
     builder: () => LyraAudioHandler(),
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.lyra.channel.audio',
-      androidNotificationChannelName: 'Lyra Music Player',
-      androidNotificationOngoing: false,
+      androidNotificationChannelName: 'Lyra Playback',
+      // Keep the foreground service alive when paused so the user can
+      // resume from the notification without the service being killed.
       androidStopForegroundOnPause: false,
-      androidResumeOnClick: true,
-      androidShowNotificationBadge: false,
     ),
   );
-
-  // Register the initialized handler in GetX.
+  // Register the handler as a permanent singleton. If this is a re-launch,
+  // Get.put will simply update the existing registration.
   Get.put<LyraAudioHandler>(handler, permanent: true);
 
-  // Register controllers only after AudioService initialization.
-  Get.put<SongController>(SongController(), permanent: true);
+  // SongController is permanent — it must never be garbage-collected while
+  // audio is playing, because its initplayer() listeners drive the UI.
+  Get.put(SongController(), permanent: true);
 
   Get.put<WidgetTimer>(WidgetTimer(), permanent: true);
-
   Get.put<MainController>(MainController(), permanent: true);
 
   await NotificationService.initialize();

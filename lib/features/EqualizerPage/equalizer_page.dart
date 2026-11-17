@@ -5,8 +5,8 @@ import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 
 class EqualizerPage extends StatelessWidget {
   EqualizerPage({super.key});
-  final EqualizerController controller = Get.put(EqualizerController());
-  final SongController songController = Get.put(SongController());
+  final EqualizerController controller = Get.find<EqualizerController>();
+  final SongController songController = Get.find<SongController>();
 
   @override
   Widget build(BuildContext context) {

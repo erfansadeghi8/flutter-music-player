@@ -11,7 +11,7 @@ class PlaylistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center , 
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 50, 20, 10),

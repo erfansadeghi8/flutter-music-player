@@ -41,8 +41,6 @@ class ListAllSongs extends StatelessWidget {
                         if (songController.isplay.value) {
                           await songController.resetCurrentPostion();
                           songController.addRecentlySong(listAllSongs.id);
-                        } else {
-                          await songController.audioPlayer.stop();
                         }
                       } finally {
                         songController.isChangingSong = false;

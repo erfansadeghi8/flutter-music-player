@@ -3,7 +3,6 @@ import 'dart:isolate';
 import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/instance_manager.dart';
-import 'package:music_player/core/services/lyra_audio_handler.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
 
 class NotificationService {
@@ -51,15 +50,15 @@ class NotificationService {
   }
 
   // Check if music is currently playing via audio_service
-  static bool get _isMusicPlaying {
-    try {
-      if (Get.isRegistered<LyraAudioHandler>()) {
-        final handler = Get.find<LyraAudioHandler>();
-        return handler.playbackState.value.playing;
-      }
-    } catch (_) {}
-    return false;
-  }
+  // static bool get _isMusicPlaying {
+  //   try {
+  //     if (Get.isRegistered<LyraAudioHandler>()) {
+  //       final handler = Get.find<LyraAudioHandler>();
+  //       return handler.playbackState.value.playing;
+  //     }
+  //   } catch (_) {}
+  //   return false;
+  // }
    
   static Future<void> ShowSleepTimer({
     //زمان باقی مانده رو از بیرون میگیریم
@@ -67,9 +66,9 @@ class NotificationService {
   }) async {
     // Don't show separate sleep timer notification if music is playing
     // The audio_service notification handles playback controls
-    if (_isMusicPlaying) {
-      return;
-    }
+    // if (_isMusicPlaying) {
+    //   return;
+    // }
     
     final androidDetails = AndroidNotificationDetails(
       channelId,
