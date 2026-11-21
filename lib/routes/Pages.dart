@@ -1,11 +1,11 @@
 // ignore_for_file: file_names
 import 'package:get/get.dart';
 import 'package:music_player/features/EqualizerPage/equalizer_page.dart';
-import 'package:music_player/features/main/pages/main_screen.dart';
-import 'package:music_player/features/pageWelcom/pageWelcom.dart';
 import 'package:music_player/home/home_page.dart';
 import 'package:music_player/home/widgets/see_recently_page.dart';
 import 'package:music_player/library/library_list_page/library_list_page.dart';
+import 'package:music_player/main/main_screen.dart';
+import 'package:music_player/pageWelcom/pageWelcom.dart';
 import 'package:music_player/routes/bilding.dart';
 import 'package:music_player/routes/router.dart';
 
@@ -42,13 +42,11 @@ class AppPages {
     GetPage(
       name: AppRouter.seeRecentlyPage,
       page: () => SeeRecentlyPage(),
-      binding: PageSeeRecentlyBilding(),
     ),
     GetPage(
       name: AppRouter.libraryListPage,
       page: () => LibraryListPage(),
       arguments: Get.arguments,
-      binding: LibraryListPageBilding(),
     ),
   ];
 }

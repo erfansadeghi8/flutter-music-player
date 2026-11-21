@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
-import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
+import 'package:music_player/main/mainScreenController/main_screen_controller.dart';
 import 'package:music_player/search/searchController/search_controller.dart';
 
 class ListRecentlySearch extends StatelessWidget {

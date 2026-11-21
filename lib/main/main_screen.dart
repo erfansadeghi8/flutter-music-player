@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
-import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
-import 'package:music_player/features/main/widgets/bottomnavbar.dart';
-import 'package:music_player/features/main/widgets/drawer_widget.dart';
 import 'package:music_player/home/widgets/app_bar_widget.dart';
 import 'package:music_player/home/widgets/show_playing_music.dart';
+import 'package:music_player/main/mainScreenController/main_screen_controller.dart';
+import 'package:music_player/main/widgets/bottomnavbar.dart';
+import 'package:music_player/main/widgets/drawer_widget.dart';
 
 class MainScreen extends StatelessWidget {
   MainScreen({super.key});
   final controller = Get.find<MainController>();
-  final songController = Get.find<SongController>();
+  final songController = Get.put(SongController());
   final nameStorage = Storage();
   
   @override

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
+import 'package:music_player/pageWelcom/pageWelcomController/pageWelcomController.dart';
 
 class Pagetwo extends StatelessWidget {
   Pagetwo({super.key});

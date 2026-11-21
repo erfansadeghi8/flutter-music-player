@@ -4,7 +4,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/route_manager.dart';
 import 'package:get/state_manager.dart';
 import 'package:music_player/core/constants/colors.dart';
-import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
+import 'package:music_player/pageWelcom/pageWelcomController/pageWelcomController.dart';
 import 'package:music_player/routes/router.dart';
 
 class BottomNavigationBarwidget extends StatelessWidget {

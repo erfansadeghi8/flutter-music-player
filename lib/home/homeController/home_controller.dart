@@ -7,7 +7,7 @@ import 'package:on_audio_query/on_audio_query.dart';
 
 class HomeController extends GetxController {
   final storage = GetStorage();
-  final songController = Get.find<SongController>();
+  final songController = Get.put(SongController());
   final _loadedSongId = Rxn<int>();
   RxInt selectedIndexListSong = 0.obs;
   RxInt selectedNavbar = 0.obs;

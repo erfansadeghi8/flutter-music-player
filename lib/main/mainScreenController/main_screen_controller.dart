@@ -14,6 +14,7 @@ class MainController extends GetxController {
   final box = GetStorage();
 
   List<Widget> listnavbar = [
+    // AppRouter.homescreen, 
     HomePage(),
     SearchPage(),
     LibraryPage(),

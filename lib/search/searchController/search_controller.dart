@@ -1,13 +1,10 @@
-
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:music_player/main/mainScreenController/main_screen_controller.dart';
 import 'package:on_audio_query/on_audio_query.dart';
-
 import 'package:music_player/core/services/storage.dart';
 import 'package:music_player/features/Songs/Controllers/song_controller.dart';
-import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
 
 class SearchPageController extends GetxController {
   final TextEditingController controllersearch =

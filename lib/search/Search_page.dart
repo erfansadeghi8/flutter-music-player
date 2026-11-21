@@ -1,5 +1,4 @@
 // ignore_for_file: file_names
-
 import 'package:flutter/widgets.dart';
 import 'package:music_player/home/widgets/show_playing_music.dart';
 import 'package:music_player/search/widgets/form_fied_search.dart';

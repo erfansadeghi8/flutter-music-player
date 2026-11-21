@@ -6,12 +6,12 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/utils.dart';
 import 'package:music_player/core/constants/appSize.dart';
 import 'package:music_player/core/theme/app_theme_extension.dart';
-import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
-import 'package:music_player/features/pageWelcom/widgets/bottomNavigationBar.dart';
-import 'package:music_player/features/pageWelcom/widgets/indexPageWelcom.dart';
-import 'package:music_player/features/pageWelcom/widgets/pageOne.dart';
-import 'package:music_player/features/pageWelcom/widgets/pageThree.dart';
-import 'package:music_player/features/pageWelcom/widgets/pageTwo.dart';
+import 'package:music_player/pageWelcom/pageWelcomController/pageWelcomController.dart';
+import 'package:music_player/pageWelcom/widgets/bottomNavigationBar.dart';
+import 'package:music_player/pageWelcom/widgets/indexPageWelcom.dart';
+import 'package:music_player/pageWelcom/widgets/pageOne.dart';
+import 'package:music_player/pageWelcom/widgets/pageThree.dart';
+import 'package:music_player/pageWelcom/widgets/pageTwo.dart';
 
 class PageWelcom extends StatelessWidget {
   PageWelcom({super.key});

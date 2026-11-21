@@ -1,13 +1,11 @@
 import 'package:get/get.dart';
 import 'package:music_player/features/EqualizerPage/equalizerController/equalizer_page_controller.dart';
-import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
-import 'package:music_player/features/pageWelcom/pageWelcomController/pageWelcomController.dart';
+import 'package:music_player/features/Songs/Controllers/song_controller.dart';
 import 'package:music_player/home/homeController/home_controller.dart';
+import 'package:music_player/main/mainScreenController/main_screen_controller.dart';
+import 'package:music_player/pageWelcom/pageWelcomController/pageWelcomController.dart';
 
-//Made bilding for splashScreenPageBilding
-// ignore: camel_case_types
 
-//Made bilding for WelcomePageBilding
 class WelcomePageBilding extends Bindings {
   @override
   void dependencies() {
@@ -19,7 +17,8 @@ class WelcomePageBilding extends Bindings {
 class MainScreenBilding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => MainController());
+    Get.put(MainController(), permanent: true);
+    Get.put(SongController(), permanent: true);
   }
 }
 
@@ -34,7 +33,6 @@ class HomePageBilding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => HomeController());
-    Get.lazyPut(() => MainController());
   }
 }
 
@@ -45,12 +43,3 @@ class EqualizerBilding extends Bindings {
   }
 }
 
-class PageSeeRecentlyBilding extends Bindings {
-  @override
-  void dependencies() {}
-}
-
-class LibraryListPageBilding extends Bindings {
-  @override
-  void dependencies() {}
-}

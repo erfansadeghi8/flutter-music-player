@@ -6,7 +6,7 @@ import 'package:get/route_manager.dart';
 import 'package:get/state_manager.dart';
 import 'package:music_player/core/theme/app_theme_extension_timer.dart';
 import 'package:music_player/core/widgets/widget_timer.dart';
-import 'package:music_player/features/main/pages/mainScreenController/main_screen_controller.dart';
+import 'package:music_player/main/mainScreenController/main_screen_controller.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 class ShowModalTimer extends StatelessWidget {
